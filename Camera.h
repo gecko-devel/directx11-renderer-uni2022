@@ -21,7 +21,11 @@ public:
 	XMFLOAT3 GetPosition() { return _pos; }
 
 	XMFLOAT4X4 GetView() { return _view; }
+	XMMATRIX GetViewMatrix() { return XMLoadFloat4x4(&_view); }
 	XMFLOAT4X4 GetProjection() { return _projection; }
+	XMMATRIX GetProjectionMatrix() { return XMLoadFloat4x4(&_projection); }
+	FLOAT GetNear() { return _nearDepth; }
+	FLOAT GetFar() { return _farDepth; }
 
 protected:
 	XMFLOAT3 _pos;

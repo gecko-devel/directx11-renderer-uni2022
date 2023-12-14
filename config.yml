@@ -1,3 +1,5 @@
+windowSize: [1920, 1080] # x,y
+
 fog:
   start: 10
   range: 20
@@ -64,6 +66,15 @@ materials:
     specularPower: 5.0
     isTranslucent: false
 
+  - name: "basic"
+    albedoPath: ""
+    specularMapPath: ""
+    ambient: [1.0, 1.0, 1.0, 1.0]
+    diffuse: [1.0, 1.0, 1.0, 1.0]
+    specular: [0.0, 0.0, 0.0, 1.0]
+    specularPower: 5.0
+    isTranslucent: false
+
 gameObjects:
   - modelPath: "models\\cube.obj"
     material: "crate"
@@ -95,11 +106,17 @@ gameObjects:
     scale: [1.0, 1.0, 1.0]
     rotation: [0.0, 0.0, 0.0]
 
+  - modelPath: "models\\cube.obj"
+    material: "basic"
+    position: [-3.5, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+    rotation: [0.0, 0.0, 0.0]
+
 lighting:
   ambientLight: [0.2, 0.2, 0.2, 1]
 
   directionalLights:
-    - direction: [0.5, 0.5, 0.1]
+    - direction: [-0.5, 0.5, 0.1]
       color: [0.8, 0.8, 0.8, 1.0]
 
   pointLights:
@@ -112,4 +129,22 @@ lighting:
       color: [0, 1, 0, 1]
       attenuation: 0.1
       direction: [-0.2, -1, 0]
+      spotAngle: 10 # degrees
+
+    - position: [-4, 5, 0]
+      color: [1, 0, 0, 1]
+      attenuation: 0.01
+      direction: [0, -1, 0]
+      spotAngle: 10 # degrees
+
+    - position: [-3.5, 5, 0.8]
+      color: [0, 1, 0, 1]
+      attenuation: 0.01
+      direction: [0, -1, 0]
+      spotAngle: 10 # degrees
+
+    - position: [-3, 5, 0]
+      color: [0, 0, 1, 1]
+      attenuation: 0.01
+      direction: [0, -1, 0]
       spotAngle: 10 # degrees

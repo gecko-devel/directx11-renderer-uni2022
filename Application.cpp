@@ -37,6 +37,30 @@ bool Application::CompareDistanceToCamera(GameObject* i1, GameObject* i2)
     return i1Distance < i2Distance;
 }
 
+void Application::Pick()
+{
+    // Get cursor position on screen
+    POINT cursorPoint;
+    ScreenToClient(_hWnd, &cursorPoint);
+
+    // Get raycast in viewing space
+    XMVECTOR rayOrigin = XMVectorSet(cursorPoint.x, cursorPoint.y, 1.0f, 0.0f);
+    XMVECTOR ray = XMVector3Unproject(
+        rayOrigin,
+        0,
+        0,
+        _WindowWidth,
+        _WindowHeight,
+        _currentCamera->GetNear(),
+        _currentCamera->GetFar(),
+        _currentCamera->GetProjectionMatrix(),
+        _currentCamera->GetViewMatrix(),
+        XMLoadFloat4x4(&_world)
+    );
+
+    // It was at this point that I turned the page of the Frank Luna bible and said, "nah, this aint it."
+}
+
 Application::Application()
 {
 	_hInst = nullptr;
@@ -62,6 +86,13 @@ Application::~Application()
 
 HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 {
+    // Load config
+    _config = YAML::LoadFile("config.yml");
+
+    // Read window settings
+    _WindowWidth = _config["windowSize"][0].as<int>();
+    _WindowHeight = _config["windowSize"][1].as<int>();
+
     if (FAILED(InitWindow(hInstance, nCmdShow)))
 	{
         return E_FAIL;
@@ -69,8 +100,6 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     RECT rc;
     GetClientRect(_hWnd, &rc);
-    _WindowWidth = rc.right - rc.left;
-    _WindowHeight = rc.bottom - rc.top;
 
     if (FAILED(InitDevice()))
     {
@@ -79,11 +108,11 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
         return E_FAIL;
     }
 
+    // Read the config and generate objects within
+    LoadSceneFromConfig();
+
 	// Initialize the world matrix
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
-
-    // Read the config and generate objects within
-    ParseConfig("config.yml");
 
     // Set current camera
     _currentCamera = _cameras[0];
@@ -200,10 +229,8 @@ HRESULT Application::InitShadersAndInputLayout()
 	return hr;
 }
 
-void Application::ParseConfig(std::string configPath)
+void Application::LoadSceneFromConfig()
 {
-    _config = YAML::LoadFile(configPath);
-
     // Read fog settings
     _fog.Start = _config["fog"]["start"].as<float>();
     _fog.Range = _config["fog"]["range"].as<float>();
@@ -379,7 +406,7 @@ HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
 
     // Create window
     _hInst = hInstance;
-    RECT rc = {0, 0, 1920, 1080};
+    RECT rc = {0, 0, _WindowWidth, _WindowHeight};
     AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
     _hWnd = CreateWindow(L"TutorialWindowClass", L"DX11 Framework", WS_OVERLAPPEDWINDOW,
                          CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
@@ -624,8 +651,8 @@ void Application::Draw()
     _pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     // Set the view and projection matrices for later
-    XMMATRIX view = XMLoadFloat4x4(&_currentCamera->GetView());
-    XMMATRIX projection = XMLoadFloat4x4(&_currentCamera->GetProjection());
+    XMMATRIX view = _currentCamera->GetViewMatrix();
+    XMMATRIX projection = _currentCamera->GetProjectionMatrix();
 
     // Render the gameobjects!
 

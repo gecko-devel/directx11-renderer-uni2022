@@ -69,7 +69,7 @@ private:
 	std::vector<GameObject*> _translucentGameObjects;
 	std::vector<GameObject*> _orderedGameObjects;
 
-	void ParseConfig(std::string configPath);
+	void LoadSceneFromConfig();
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
 	void Cleanup();
@@ -80,6 +80,8 @@ private:
 	UINT _WindowWidth;
 
 	bool CompareDistanceToCamera(GameObject* i1, GameObject* i2);
+
+	void Pick();
 public:
 	Application();
 	~Application();
