@@ -97,7 +97,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     float3 viewerDir = normalize(EyePosW - input.PosW);
     
-    float3 reflectDir = reflect(-DirToLight, input.NormalW);
+    float3 reflectDir = reflect(-DirToLight, normalize(input.NormalW));
     reflectDir = normalize(reflectDir);
     
     float specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), SpecPower);

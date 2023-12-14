@@ -83,12 +83,12 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     directionToLight = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
-    DiffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    DiffuseLight = XMFLOAT4(0.5f, 1.0f, 1.0f, 1.0f);
     DiffuseMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
     SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     SpecularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    SpecularPower = 10.0f;
+    SpecularPower = 5.0f;
     XMStoreFloat3(&EyeWorldPos, Eye);
 
 	return S_OK;
