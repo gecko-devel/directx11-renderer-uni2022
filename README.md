@@ -2,7 +2,7 @@
 
 A University project done over the course of Semester 1, 2022.
 
-![Video](https://youtu.be/bUPgbtg6lCE)
+[Video](https://youtu.be/bUPgbtg6lCE)
 
 ## What is it?
 
