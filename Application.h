@@ -33,7 +33,7 @@ private:
 	IDXGISwapChain*         _pSwapChain;
 	ID3D11RenderTargetView* _pRenderTargetView;
 	ID3D11VertexShader*     _pVertexShader;
-	ID3D11PixelShader*      _pPixelShader;
+	ID3D11PixelShader*      _pPixelShader; 
 	ID3D11InputLayout*      _pVertexLayout;
 	ID3D11Buffer*           _pConstantBuffer;
 	XMFLOAT4X4              _world;
@@ -48,8 +48,13 @@ private:
 	std::vector<BaseCamera*> _cameras;
 
 	// lighting vars
-	GlobalLight _globalLight;
+	XMFLOAT4 _ambientLight;
+
+	DirectionalLight _directionalLights[20];
 	PointLight _pointLights[20];
+
+	int _numDirectionalLights;
+	int _numPointLights;
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
@@ -66,7 +71,6 @@ private:
 	// GameObject list
 	std::vector<GameObject*> _gameObjects;
 
-private:
 	void ParseConfig(std::string configPath);
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();

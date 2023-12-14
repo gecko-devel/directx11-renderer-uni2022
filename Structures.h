@@ -27,12 +27,10 @@ struct MeshData
 	UINT IndexCount;
 };
 
-struct GlobalLight
+struct DirectionalLight
 {
-	XMFLOAT4 AmbientLight;
-	XMFLOAT4 DiffuseLight;
-	XMFLOAT4 SpecularLight;
-	XMFLOAT4 DirectionToLight;
+	XMFLOAT4 Color;
+    XMFLOAT4 Direction;
 };
 
 struct PointLight
@@ -60,8 +58,10 @@ struct ConstantBuffer
 	XMMATRIX mView;
 	XMMATRIX mProjection;
 
-	GlobalLight globalLight;
-	PointLight PointLights[20];
+	XMFLOAT4 ambientLight;
+
+	DirectionalLight directionalLights[20];
+	PointLight pointLights[20];
 
 	XMFLOAT4 AmbMat;
 	XMFLOAT4 DiffMat;
@@ -76,6 +76,7 @@ struct ConstantBuffer
 	XMFLOAT3 EyePosW;
 
 	int numPointLights;
+	int numDirectionalLights;
 };
 
 // Conversion functions for YAML yoinked and edited from here:

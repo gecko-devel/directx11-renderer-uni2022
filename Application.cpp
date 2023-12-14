@@ -78,12 +78,6 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Set current camera
     _currentCamera = _cameras[0];
 
-    // Make Global Light
-    _globalLight.AmbientLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    _globalLight.DiffuseLight = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-    _globalLight.SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    _globalLight.DirectionToLight = XMFLOAT4(-0.5f, 0.5f, 0.0f, 0.0f);
-
     // Create mip-map sampler using DirectX 11
     D3D11_SAMPLER_DESC sampDesc;
     ZeroMemory(&sampDesc, sizeof(sampDesc)); // Fill with zeros. Makes sure it's allocated but empty.
@@ -274,9 +268,26 @@ void Application::ParseConfig(std::string configPath)
         _gameObjects.push_back(go);
     }
 
-    // Read point lights
+    // Read ambient light
+    _ambientLight = _config["lighting"]["ambientLight"].as<XMFLOAT4>();
+
+    // Read directional lights
     int i = 0;
-    for (YAML::Node plNode : _config["pointLights"])
+    for (YAML::Node dlNode : _config["lighting"]["directionalLights"])
+    {
+        DirectionalLight directionalLight;
+
+        directionalLight.Color = dlNode["color"].as<XMFLOAT4>();
+        directionalLight.Direction = dlNode["direction"].as<XMFLOAT4>();
+
+        _directionalLights[i] = directionalLight;
+        i++;
+    }
+    _numDirectionalLights = i;
+
+    // Read point lights
+    i = 0;
+    for (YAML::Node plNode : _config["lighting"]["pointLights"])
     {
         PointLight pointLight;
 
@@ -287,6 +298,7 @@ void Application::ParseConfig(std::string configPath)
         _pointLights[i] = pointLight;
         i++;
     }
+    _numPointLights = i;
 }
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
@@ -562,14 +574,16 @@ void Application::Draw()
         cb.mWorld = XMMatrixTranspose(world);
         cb.mView = XMMatrixTranspose(view);
         cb.mProjection = XMMatrixTranspose(projection);
-        cb.globalLight = _globalLight;
-        std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.PointLights)); // copy pointlights to constant buffer
+        cb.ambientLight = _ambientLight;
+        std::copy(std::begin(_directionalLights), std::end(_directionalLights), std::begin(cb.directionalLights)); // copy pointlights to constant buffer
+        std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.pointLights)); // copy pointlights to constant buffer
         cb.AmbMat = go->GetMaterial()->AmbientReflectivity;
         cb.DiffMat = go->GetMaterial()->DiffuseReflectivity;
         cb.SpecMat = go->GetMaterial()->SpecularReflectivity;
         cb.EyePosW = _currentCamera->GetPosition();
         cb.specularPower = go->GetMaterial()->SpecularPower;
-        cb.numPointLights = 2;
+        cb.numDirectionalLights = _numDirectionalLights;
+        cb.numPointLights = _numPointLights;
         
         // Check for albedo texture
         if ((go->GetMaterial()->AlbedoTexture) != nullptr)
