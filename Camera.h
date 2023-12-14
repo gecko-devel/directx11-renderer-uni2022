@@ -40,7 +40,7 @@ private:
 	FLOAT _nearDepth;
 	FLOAT _farDepth;
 
-	// projection and view matrices to be passed to the shader
+	// projection and view matrices to be passed to the shaders
 	XMFLOAT4X4 _view;
 	XMFLOAT4X4 _projection;
 };
