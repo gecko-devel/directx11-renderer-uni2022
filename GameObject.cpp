@@ -5,32 +5,22 @@ GameObject::GameObject()
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
 }
 
+void GameObject::Update()
+{
+	XMStoreFloat4x4(&_world, XMLoadFloat4x4(&_trans) * XMLoadFloat4x4(&_rot) * XMLoadFloat4x4(&_scale));
+}
+
 void GameObject::SetPosition(XMFLOAT3 newPosition)
 {
-	_world.m[3][0] = newPosition.x;
-	_world.m[3][1] = newPosition.y;
-	_world.m[3][2] = newPosition.z;
+	XMStoreFloat4x4(&_trans, XMMatrixTranslation(newPosition.x, newPosition.y, newPosition.z));
 }
 
 void GameObject::SetScale(XMFLOAT3 newScale)
 {
-	XMVECTOR oldScaleVec;
-	XMVECTOR newScaleVec = XMLoadFloat3(&newScale);
-	XMMATRIX worldMatrix = XMLoadFloat4x4(&_world);
+	XMStoreFloat4x4(&_scale, XMMatrixScaling(newScale.x, newScale.y, newScale.z));
+}
 
-	// Calculate the scale by getting the sum of each column
-	float oldScale[3];
-	for (int i = 0; i < 3; i++)
-	{
-		float sum = 0.0f;
-		for (float f : _world.m[0])
-		{
-			sum += f;
-		}
-		oldScale[i] = sum;
-	}
-
-	oldScaleVec = XMLoadFloat3(&XMFLOAT3(oldScale[0], oldScale[1], oldScale[2]));
-
-	XMStoreFloat4x4(&_world, worldMatrix * XMMatrixScalingFromVector(newScaleVec - oldScaleVec));
+void GameObject::SetRotation(XMFLOAT3 newRotation)
+{
+	XMStoreFloat4x4(&_rot, XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&newRotation)));
 }

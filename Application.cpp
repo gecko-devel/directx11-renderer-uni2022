@@ -311,7 +311,8 @@ void Application::LoadConfig(std::string configPath)
         // Set scale
         go->SetScale(goNode["scale"].as<XMFLOAT3>());
 
-        // TODO: Set rotation, too!
+        // Set Rot
+        go->SetRotation(goNode["rotation"].as<XMFLOAT3>());
 
         // Set colour
         go->SetColor(goNode["color"].as<XMFLOAT4>());
@@ -593,6 +594,12 @@ void Application::Update()
 
     // Update the camera
     _currentCamera->Update();
+
+    // Update GameObjects
+    for (GameObject* go : _gameObjects)
+    {
+        go->Update();
+    }
 }
 
 void Application::Draw()
