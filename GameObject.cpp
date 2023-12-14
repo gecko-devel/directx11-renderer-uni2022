@@ -28,3 +28,12 @@ void GameObject::SetScale(XMFLOAT3 newScale)
 {
 	XMStoreFloat4x4(&_scale, XMMatrixScaling(newScale.x, newScale.y, newScale.z));
 }
+
+void GameObject::RotateOnAxes(XMFLOAT3 rotationDegrees)
+{
+	rotationDegrees.x = XMConvertToRadians(rotationDegrees.x);
+	rotationDegrees.y = XMConvertToRadians(rotationDegrees.y);
+	rotationDegrees.z = XMConvertToRadians(rotationDegrees.z);
+
+	XMStoreFloat4x4(&_rot, XMLoadFloat4x4(&_rot) * XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&rotationDegrees)));
+}

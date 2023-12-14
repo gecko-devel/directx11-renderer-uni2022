@@ -29,6 +29,8 @@ public:
 	void SetRotation(XMFLOAT3 newRotation);
 	void SetScale(XMFLOAT3 newScale);
 
+	void RotateOnAxes(XMFLOAT3 rotationDegrees);
+
 	MeshData* GetMeshData() { return &_meshData; }
 	Material* GetMaterial() { return &_material; }
 	XMFLOAT4X4* GetWorld() { return &_world; }
