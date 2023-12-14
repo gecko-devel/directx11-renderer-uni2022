@@ -11,5 +11,9 @@ public:
     static int GetHorizontalAxis();
     static int GetUpDownAxis();
 	static XMFLOAT3 Get3DInputVector();
+
+    static int GetXAxis();
+    static int GetYAxis();
+    static XMFLOAT2 GetLookInputVector();
 };
 

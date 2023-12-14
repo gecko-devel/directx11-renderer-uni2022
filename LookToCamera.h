@@ -2,7 +2,7 @@
 #include "BaseCamera.h"
 class LookToCamera : public BaseCamera
 {
-private:
+protected:
 	XMFLOAT3 _to;
 	
 public:

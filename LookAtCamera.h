@@ -10,7 +10,7 @@ public:
 	void SetAt(XMFLOAT3 newAt);
 	XMFLOAT3 GetAt() { return _at; }
 
-private:
+protected:
 	XMFLOAT3 _at;
 };
 

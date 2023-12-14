@@ -19,3 +19,18 @@ XMFLOAT3 Input::Get3DInputVector()
 {
     return XMFLOAT3(Input::GetHorizontalAxis(), Input::GetUpDownAxis(), Input::GetVerticalAxis());
 }
+
+int Input::GetXAxis()
+{
+    return (int)GetAsyncKeyState(VK_UP) - (int)GetAsyncKeyState(VK_DOWN); // Down and Up arrows
+}
+
+int Input::GetYAxis()
+{
+    return (int)GetAsyncKeyState(VK_LEFT) - (int)GetAsyncKeyState(VK_RIGHT); // Left and Right arrows
+}
+
+XMFLOAT2 Input::GetLookInputVector()
+{
+    return XMFLOAT2(Input::GetXAxis(), Input::GetYAxis());
+}

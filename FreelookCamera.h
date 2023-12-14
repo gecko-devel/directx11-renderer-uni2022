@@ -13,5 +13,6 @@ public:
 
 private:
 	float _speed;
+	float _rotationSpeed;
 };
 

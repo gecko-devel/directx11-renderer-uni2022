@@ -15,7 +15,7 @@ BaseCamera::~BaseCamera() {}
 void BaseCamera::Update()
 {
 	// Create the projection matrix
-	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _windowWidth / _windowHeight, 0.01f, 100.0f));
+	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XMConvertToRadians(65.0f), _windowWidth / _windowHeight, 0.01f, 100.0f));
 }
 
 void BaseCamera::SetPosition(XMFLOAT3 newPosition)
