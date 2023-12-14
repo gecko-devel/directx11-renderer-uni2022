@@ -9,6 +9,8 @@
 #include "OBJLoader.h"
 #include "Structures.h"
 #include "Camera.h"
+#include "yaml-cpp/yaml.h"
+
 
 using namespace DirectX;
 
