@@ -15,6 +15,11 @@ cbuffer ConstantBuffer : register( b0 )
     
     float4 AmbLight;
     float4 AmbMat;
+    
+    float4 DiffLight;
+    float4 DiffMat;
+    float3 DirToLight;
+    
     float T;
 }
 
@@ -39,10 +44,23 @@ VS_OUTPUT VS( float3 Pos : POSITION, float3 Normal : NORMAL, float3 PosW : POSIT
     output.Pos = mul( output.Pos, View );
     output.Pos = mul( output.Pos, Projection );
     
+    // Normalise normals
     Normal = normalize(Normal);
     
+    // Diffuse Lighting
+    float4 NormalW = mul(Normal, World);
+    NormalW = normalize(NormalW);
     
-    output.Color = AmbLight * AmbMat;
+    float4 potentialDiff = DiffLight * DiffMat;
+    float difPercent = max(dot(normalize(DirToLight), normalize(NormalW)), 0);
+    
+    float DiffuseAmount = difPercent * potentialDiff;
+    
+    output.Color = DiffuseAmount * (DiffMat * DiffLight);
+    
+    // Ambient Lighting
+    output.Color += AmbLight * AmbMat;
+
     return output;
 }
 

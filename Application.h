@@ -23,7 +23,12 @@ struct ConstantBuffer
 
 
 	XMFLOAT4 AmbLight;
-	XMFLOAT4 AmbMat;	
+	XMFLOAT4 AmbMat;
+
+	XMFLOAT4 DiffLight;
+	XMFLOAT4 DiffMat;
+	XMFLOAT3 DirToLight;
+
 	float mT;
 };
 
@@ -60,6 +65,11 @@ private:
 	// lighting vars
 	XMFLOAT4 AmbientLight;
 	XMFLOAT4 AmbientMaterial;
+
+	// Diffuse vars
+	XMFLOAT4 DiffuseMaterial;
+	XMFLOAT4 DiffuseLight;
+	XMFLOAT3 directionToLight;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);

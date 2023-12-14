@@ -39,6 +39,10 @@ Application::Application()
 	_pCubeVertexBuffer = nullptr;
 	_pCubeIndexBuffer = nullptr;
 	_pConstantBuffer = nullptr;
+
+    DiffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    DiffuseMaterial = XMFLOAT4(0.5f, 1.0f, 1.0f, 1.0f);
+    directionToLight = XMFLOAT3(0.0f, 0.5f, -0.5f);
 }
 
 Application::~Application()
@@ -80,6 +84,10 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     AmbientLight = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.2f);
     AmbientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+    DiffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    DiffuseMaterial = XMFLOAT4(0.5f, 1.0f, 1.0f, 1.0f);
+    directionToLight = XMFLOAT3(0.0f, 0.5f, -0.5f);
 
 	return S_OK;
 }
@@ -157,14 +165,14 @@ HRESULT Application::InitVertexBuffer()
     SimpleVertex vertices[] =
     {
         { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT3(-1.0f, 1.0f, -1.0f)  }, //0
-        { XMFLOAT3( 1.0f, 1.0f, -1.0f ) },  //1
-        { XMFLOAT3( -1.0f, -1.0f, -1.0f ) },//2
-        { XMFLOAT3( 1.0f, -1.0f, -1.0f ) }, //3
+        { XMFLOAT3( 1.0f, 1.0f, -1.0f ), XMFLOAT3(1.0f, 1.0f, -1.0f) },  //1
+        { XMFLOAT3( -1.0f, -1.0f, -1.0f ), XMFLOAT3(-1.0f, -1.0f, -1.0f) },//2
+        { XMFLOAT3( 1.0f, -1.0f, -1.0f ), XMFLOAT3(1.0f, -1.0f, -1.0f) }, //3
 
-        { XMFLOAT3(-1.0f, 1.0f, 1.0f) },      //4
-        { XMFLOAT3(1.0f, 1.0f, 1.0f) },       //5
-        { XMFLOAT3(-1.0f, -1.0f, 1.0f) },     //6
-        { XMFLOAT3(1.0f, -1.0f, 1.0f) },      //7
+        { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f, 1.0f, 1.0f) },      //4
+        { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) },       //5
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, -1.0f, 1.0f) },     //6
+        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, -1.0f, 1.0f) },      //7
     };
 
     D3D11_BUFFER_DESC bd;
@@ -186,12 +194,12 @@ HRESULT Application::InitVertexBuffer()
     // Create vertex buffer
     SimpleVertex pyramid_vertices[] =
     {
-        { XMFLOAT3(1.0f, -1.0f, -1.0f) }, //0
-        { XMFLOAT3(-1.0f, -1.0f, -1.0f) }, //1
-        { XMFLOAT3(1.0f, -1.0f, 1.0f) }, //2
-        { XMFLOAT3(-1.0f, -1.0f, 1.0f) }, //3
+        { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, -1.0f, -1.0f) }, //0
+        { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f, -1.0f, -1.0f) }, //1
+        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, -1.0f, 1.0f) }, //2
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, -1.0f, 1.0f) }, //3
 
-        { XMFLOAT3(0.0f, 1.0f, 0.0f) }, // 4 - tip
+        { XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) }, // 4 - tip
     };
 
     D3D11_BUFFER_DESC pyramidBd;
@@ -580,6 +588,9 @@ void Application::Draw()
     cb.mT = _t;
     cb.AmbLight = AmbientLight;
     cb.AmbMat = AmbientMaterial;
+    cb.DiffLight = DiffuseLight;
+    cb.DiffMat = DiffuseMaterial;
+    cb.DirToLight = directionToLight;
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
