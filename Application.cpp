@@ -39,8 +39,6 @@ Application::Application()
 	_pVertexShader = nullptr;
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
-	_pCubeVertexBuffer = nullptr;
-	_pCubeIndexBuffer = nullptr;
 	_pConstantBuffer = nullptr;
 
     YAML::Node config = YAML::LoadFile("config.yaml");
@@ -75,6 +73,9 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	// Initialize the world matrix
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
 
+    // Load the config values and create gameobjects
+    LoadConfig("config.yml");
+
     // Make cameras
     XMFLOAT3 cameraPos = XMFLOAT3(0.0f, 0.0f, -30.0f);
     XMFLOAT3 cameraAt = XMFLOAT3(0.0f, 0.0f, 1.0f);
@@ -82,7 +83,11 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     FLOAT cameraNear = 0.01f;
     FLOAT cameraFar = 100.0f;
 
-    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::To));
+
+    // Load config values into first camera
+    XMFLOAT3 yamlCameraPos = _config["debugCamera"]["position"].as<XMFLOAT3>();
+    _cameras.push_back(new Camera(yamlCameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::To));
+    // Use values above for second camera
     _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::At));
     _currentCamera = _cameras.at(0);
 
@@ -90,8 +95,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     _globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
     _globalLight.DiffuseLight = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
     _globalLight.SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    _globalLight.DirectionToLight = XMFLOAT3(-0.5f, 0.5f, 0.0f);
-    _globalLight.SpecularPower = 5.0f;
+    _globalLight.DirectionToLight = XMFLOAT4(-0.5f, 0.5f, 0.0f, 0.0f);
 
     // Add point lights
     PointLight pointLight1;
@@ -105,24 +109,6 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     pointLight2.Color = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
     pointLight2.Attenuation = 0.01f;
     _pointLights[1] = pointLight2;
-
-    // Define materials for the lights. Remove this later when encapsulated.
-    _ambientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    _diffuseMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    _specularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-    // Texture initialisation
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pColorTextureRV);
-    _pImmediateContext->PSSetShaderResources(0, 1, &_pColorTextureRV);
-
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_SPEC.dds", nullptr, &_pSpecularTextureRV);
-    _pImmediateContext->PSSetShaderResources(1, 1, &_pSpecularTextureRV);
-
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_NORM.dds", nullptr, &_pNormalTextureRV);
-    _pImmediateContext->PSSetShaderResources(2, 1, &_pNormalTextureRV);
-
-    // Import yippee OBJ
-    _yippeeMeshData = OBJLoader::Load("models/TBH.obj", _pd3dDevice, false);
 
     // Create mip-map sampler using DirectX 11
     D3D11_SAMPLER_DESC sampDesc;
@@ -209,88 +195,78 @@ HRESULT Application::InitShadersAndInputLayout()
 	return hr;
 }
 
-HRESULT Application::InitVertexBuffer()
+void Application::LoadConfig(std::string configPath)
 {
-	HRESULT hr;
+    _config = YAML::LoadFile(configPath);
 
-    // Create vertex buffer
-    SimpleVertex vertices[] =
+    // Read materials
+    // TODO: Maybe make each of these its own conversion function in Structures.h
+    for (YAML::Node matNode : _config["materials"])
     {
-        // labelled from the direction you'd look at the face
-        { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f)}, //0 Front Top Left
-        { XMFLOAT3( 1.0f, 1.0f, -1.0f ), XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },  //1 Front Top Right
-        { XMFLOAT3( -1.0f, -1.0f, -1.0f ), XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },//2 Front Bottom Left
-        { XMFLOAT3( 1.0f, -1.0f, -1.0f ), XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f)}, //3 Front Bottom Right
+        Material material;
 
-        { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },      //4 Back Top Right
-        { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },       //5 Back Top Left
-        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },     //6 Back Bottom Right
-        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },      //7 Back Bottom Left
-    };
+        // Get albedo texture
+        std::string albedoPath = matNode["albedoPath"].as<std::string>();
+        if (albedoPath != "")
+        {
+            ID3D11ShaderResourceView* albedo;
+            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(albedoPath.begin(), albedoPath.end()).c_str(), nullptr, &albedo); // Read DDS image file and write data to stack
+            material.AlbedoTexture = albedo;
+        }
 
-    D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * 8;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
+        // Get normal map texture
+        std::string normalMapPath = matNode["normalMapPath"].as<std::string>();
+        if (normalMapPath != "")
+        {
+            ID3D11ShaderResourceView* normalMap;
+            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(normalMapPath.begin(), normalMapPath.end()).c_str(), nullptr, &normalMap); // Read DDS image file and write data to stack
+            material.AlbedoTexture = normalMap;
+        }
 
-    D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = vertices;
+        // Get specular map texture
+        std::string specularMapPath = matNode["specularMapPath"].as<std::string>();
+        if (specularMapPath != "")
+        {
+            ID3D11ShaderResourceView* specularMap;
+            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(specularMapPath.begin(), specularMapPath.end()).c_str(), nullptr, &specularMap); // Read DDS image file and write data to stack
+            material.AlbedoTexture = specularMap;
+        }
 
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pCubeVertexBuffer);
+        // Set reflectivity variables
+        material.AmbientReflectivity = matNode["ambient"].as<XMFLOAT4>();
+        material.DiffuseReflectivity = matNode["diffuse"].as<XMFLOAT4>();
+        material.SpecularReflectivity = matNode["specular"].as<XMFLOAT4>();
+        material.SpecularPower = matNode["specularPower"].as<float>();
 
-    if (FAILED(hr))
-        return hr;
+        // Add material to the map, called by its name
+        std::string matName = matNode["name"].as<std::string>();
+        _materials[matName] = material;
+    }
 
-	return S_OK;
-}
-
-HRESULT Application::InitIndexBuffer()
-{
-	HRESULT hr;
-
-    // Create index buffer
-    WORD indices[] =
+    // Read game objects
+    for (YAML::Node goNode : _config["gameObjects"])
     {
-        // back
-        0,1,2,
-        2,1,3,
-        // right
-        1,5,3,
-        3,5,7,
-        // front
-        5,4,7,
-        4,6,7,
-        //left
-        4,0,6,
-        6,0,2,
-        // top
-        4,5,0,
-        0,5,1,
-        // bottom
-        2,3,6,
-        6,3,7
-    };
+        GameObject* go = new GameObject();
 
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
+        // Set mesh
+        // I HATE STRINGS AND THEIR MANY FORMS
+        go->SetMeshData(OBJLoader::Load(const_cast<char*>(goNode["modelPath"].as<std::string>().c_str()), _pd3dDevice, false));
+        
+        // Set material
+        go->SetMaterial(_materials[goNode["material"].as<std::string>()]);
 
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(WORD) * 36;     
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.CPUAccessFlags = 0;
+        // Set position
+        go->SetPosition(goNode["position"].as<XMFLOAT3>());
 
-	D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = indices;
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pCubeIndexBuffer);
+        // Set scale
+        go->SetScale(goNode["scale"].as<XMFLOAT3>());
 
-    if (FAILED(hr))
-        return hr;
+        // Set Rot
+        go->SetRotation(goNode["rotation"].as<XMFLOAT3>());
 
-	return S_OK;
+        // Load gameobject into the vector
+        _gameObjects.push_back(go);
+    }
 }
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
@@ -462,8 +438,6 @@ HRESULT Application::InitDevice()
         return S_FALSE;
     }
 
-	InitVertexBuffer();
-
     // Set primitive topology
     _pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -494,8 +468,6 @@ void Application::Cleanup()
     if (_pImmediateContext) _pImmediateContext->ClearState();
 
     if (_pConstantBuffer) _pConstantBuffer->Release();
-    if (_pCubeVertexBuffer) _pCubeVertexBuffer->Release();
-    if (_pCubeIndexBuffer) _pCubeIndexBuffer->Release();
     if (_pVertexLayout) _pVertexLayout->Release();
     if (_pVertexShader) _pVertexShader->Release();
     if (_pPixelShader) _pPixelShader->Release();
@@ -557,7 +529,7 @@ void Application::Update()
     // Move the Free camera
     XMFLOAT3 freeCamPos = _cameras.at(0)->GetPosition();
     XMFLOAT3 freeCamVelocity;
-    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * (_cameraSpeed * _deltaTime));
+    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * (_config["debugCamera"]["speed"].as<float>() * _deltaTime));
     _cameras.at(0)->SetPosition(XMFLOAT3(freeCamPos.x + freeCamVelocity.x, freeCamPos.y + freeCamVelocity.y, freeCamPos.z + freeCamVelocity.z));
 
     // Move the Orbit camera
@@ -566,6 +538,12 @@ void Application::Update()
 
     // Update the camera
     _currentCamera->Update();
+
+    // Update GameObjects
+    for (GameObject* go : _gameObjects)
+    {
+        go->Update();
+    }
 }
 
 void Application::Draw()
@@ -578,44 +556,88 @@ void Application::Draw()
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
     _pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    // Set the world, view, and projection matrices
-	XMMATRIX world = XMLoadFloat4x4(&_world);
-	XMMATRIX view = XMLoadFloat4x4(&_currentCamera->GetView());
-	XMMATRIX projection = XMLoadFloat4x4(&_currentCamera->GetProjection());
+    // Set the view and projection matrices for later
+    XMMATRIX view = XMLoadFloat4x4(&_currentCamera->GetView());
+    XMMATRIX projection = XMLoadFloat4x4(&_currentCamera->GetProjection());
 
-    //
-    // Update variables
-    //
-    ConstantBuffer cb;
-	cb.mWorld = XMMatrixTranspose(world);
-	cb.mView = XMMatrixTranspose(view);
-	cb.mProjection = XMMatrixTranspose(projection);
-    cb.globalLight = _globalLight;
-    std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.PointLights));
-    cb.AmbMat = _ambientMaterial;
-    cb.DiffMat = _diffuseMaterial;
-    cb.SpecMat = _specularMaterial;
-    cb.EyePosW = _currentCamera->GetPosition();
-    cb.mT = _t;
-    cb.numPointLights = 2;
+    // Render the gameobjects!
+    for (GameObject* go : _gameObjects)
+    {
+        // Set the world matrix
+        XMMATRIX world = XMLoadFloat4x4(go->GetWorld());
 
-	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+        // Make a constant buffer template with new shader variable values
+        ConstantBuffer cb;
+        cb.mWorld = XMMatrixTranspose(world);
+        cb.mView = XMMatrixTranspose(view);
+        cb.mProjection = XMMatrixTranspose(projection);
+        cb.globalLight = _globalLight;
+        std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.PointLights)); // copy pointlights to constant buffer
+        cb.AmbMat = go->GetMaterial()->AmbientReflectivity;
+        cb.DiffMat = go->GetMaterial()->DiffuseReflectivity;
+        cb.SpecMat = go->GetMaterial()->SpecularReflectivity;
+        cb.EyePosW = _currentCamera->GetPosition();
+        cb.specularPower = go->GetMaterial()->SpecularPower;
+        cb.numPointLights = 2;
+        
+        // Check for albedo texture
+        if ((go->GetMaterial()->AlbedoTexture) != nullptr)
+        {
+            // Set the textures to use
+            _pImmediateContext->PSSetShaderResources(0, 1, &go->GetMaterial()->AlbedoTexture); // Assign texture slot
+            cb.hasAlbedoTextue = 1;
+        }
+        else
+        {
+            cb.hasAlbedoTextue = 0;
+        }
 
-    UINT stride = sizeof(SimpleVertex);
-    UINT offset = 0;
+        // Check for normal map texture
+        if ((go->GetMaterial()->NormalMapTexture) != nullptr)
+        {
+            // Set the textures to use
+            _pImmediateContext->PSSetShaderResources(1, 1, &go->GetMaterial()->NormalMapTexture); // Assign texture slot
+            cb.hasNormalMapTextue = 1;
+        }
+        else
+        {
+            cb.hasNormalMapTextue = 0;
+        }
 
-    cb.AmbMat = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    // Set vertex and index buffers to draw the model
-    _pImmediateContext->IASetVertexBuffers(0, 1, &_yippeeMeshData.VertexBuffer, &_yippeeMeshData.VBStride, &_yippeeMeshData.VBOffset);
-    _pImmediateContext->IASetIndexBuffer(_yippeeMeshData.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-    // Set the shaders to use
-    _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
-	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
-    // Send in the constant buffer to the shaders
-	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
-    _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
-    // DRAW!
-	_pImmediateContext->DrawIndexed(_yippeeMeshData.IndexCount, 0, 0);        
+        // Check for specular map texture
+        if ((go->GetMaterial()->SpecularMapTexture) != nullptr)
+        {
+            // Set the textures to use
+            _pImmediateContext->PSSetShaderResources(2, 1, &go->GetMaterial()->SpecularMapTexture); // Assign texture slot
+            cb.hasSpecularMapTextue = 1;
+        }
+        else
+        {
+            cb.hasSpecularMapTextue = 0;
+        }
+
+        // Update the shader variables using the constant buffer struct
+        _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+        UINT stride = sizeof(SimpleVertex);
+        UINT offset = 0;
+
+        // Set vertex and index buffers to draw the model
+        _pImmediateContext->IASetVertexBuffers(0, 1, &go->GetMeshData()->VertexBuffer, &go->GetMeshData()->VBStride, &go->GetMeshData()->VBOffset);
+        _pImmediateContext->IASetIndexBuffer(go->GetMeshData()->IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+        // Set the shaders to use
+        _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
+        _pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
+
+        // Send in the constant buffer to the shaders
+        _pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
+        _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);        
+
+        // DRAW!
+        _pImmediateContext->DrawIndexed(go->GetMeshData()->IndexCount, 0, 0);
+    }
+        
 
     //
     // Present our back buffer to our front buffer

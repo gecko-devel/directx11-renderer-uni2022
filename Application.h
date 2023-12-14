@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <windows.h>
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
@@ -9,6 +10,9 @@
 #include "OBJLoader.h"
 #include "Structures.h"
 #include "Camera.h"
+#include "GameObject.h"
+#include "yaml-cpp/yaml.h"
+
 
 using namespace DirectX;
 
@@ -26,10 +30,8 @@ private:
 	ID3D11VertexShader*     _pVertexShader;
 	ID3D11PixelShader*      _pPixelShader;
 	ID3D11InputLayout*      _pVertexLayout;
-	ID3D11Buffer*           _pCubeVertexBuffer;
-	ID3D11Buffer*           _pCubeIndexBuffer;
 	ID3D11Buffer*           _pConstantBuffer;
-	XMFLOAT4X4              _world, _world2, _world3;
+	XMFLOAT4X4              _world;
 
 	ID3D11RasterizerState* _wireframe;
 
@@ -47,33 +49,29 @@ private:
 	GlobalLight _globalLight;
 	PointLight _pointLights[20];
 
-	XMFLOAT4 _ambientMaterial;
-	XMFLOAT4 _diffuseMaterial;
-	XMFLOAT4 _specularMaterial;
-
-	// Texture vars
-	ID3D11ShaderResourceView* _pColorTextureRV = nullptr;
-	ID3D11ShaderResourceView* _pSpecularTextureRV = nullptr;
-	ID3D11ShaderResourceView* _pNormalTextureRV = nullptr;
-
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
-
-	// Imported model
-	MeshData _yippeeMeshData;
 
 	// Input vector
 	XMFLOAT3 _input;
 
 	FLOAT _cameraSpeed;
 
+	// Config file
+	YAML::Node _config;
+
+	// Material map
+	std::map<std::string, Material> _materials;
+
+	// GameObject list
+	std::vector<GameObject*> _gameObjects;
+
 private:
+	void LoadConfig(std::string configPath);
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
 	void Cleanup();
 	HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 	HRESULT InitShadersAndInputLayout();
-	HRESULT InitVertexBuffer();
-	HRESULT InitIndexBuffer();
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;
