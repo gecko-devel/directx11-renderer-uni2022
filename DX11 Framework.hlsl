@@ -8,12 +8,8 @@
 // Shader vars
 //--------------------------------------------------------------------------------------
 Texture2D texDiffuse : register(t0);
-Texture2D texSpec : register(t1);
-Texture2D texNorm : register(t2);
-
-//Just another option
-//Texture2D texArray[2];
-
+Texture2D texNorm : register(t1);
+Texture2D texSpec : register(t2);
 
 SamplerState sampLinear : register(s0);
 
@@ -22,8 +18,7 @@ struct GlobalLight
     float4 AmbLight;
     float4 DiffLight;
     float4 SpecLight;
-    float3 DirectionToLight;
-    float SpecPower;
+    float4 DirectionToLight;
 };
 
 struct PointLight
@@ -49,11 +44,13 @@ cbuffer ConstantBuffer : register( b0 )
     float4 DiffMat;    
     float4 SpecMat;
     
-    bool hasTexture;
+    bool hasAlbedoTexture;
+    bool hasNormalMapTexture;
+    bool hasSpecularMapTexture;
+    
+    float specularPower;
 
     float3 EyePosW;
-    
-    float T;
     int numPointLights;
 }
 
@@ -121,7 +118,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float3 reflectDir = reflect(-mGlobalLight.DirectionToLight, normalize(input.NormalW));
     reflectDir = normalize(reflectDir);
     
-    float specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), mGlobalLight.SpecPower);
+    float specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), specularPower);
     
     input.Color += (potentialSpecular * specularIntensity);
     
@@ -143,14 +140,14 @@ float4 PS(VS_OUTPUT input) : SV_Target
         // Specular
         potentialSpecular = PointLights[i].color * texSpec.Sample(sampLinear, input.TexCoord);
         reflectDir = normalize(reflect(-directionToPointLight, normalize(input.NormalW)));
-        specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), mGlobalLight.SpecPower);
+        specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), specularPower);
         input.Color += (potentialSpecular * specularIntensity) * pointLightIntensity;
     }
     
     // ----------------
     // Texturing
     // ----------------
-    if (hasTexture == true)
+    if (hasAlbedoTexture == true)
     {
         float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
         input.Color *= textureColor;

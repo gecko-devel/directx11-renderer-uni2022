@@ -32,8 +32,7 @@ struct GlobalLight
 	XMFLOAT4 AmbientLight;
 	XMFLOAT4 DiffuseLight;
 	XMFLOAT4 SpecularLight;
-	XMFLOAT3 DirectionToLight;
-	FLOAT SpecularPower; // Power to raise falloff by. Harshness of the light, basically.
+	XMFLOAT4 DirectionToLight;
 };
 
 struct PointLight
@@ -41,6 +40,18 @@ struct PointLight
 	XMFLOAT4 Color;
 	XMFLOAT3 Pos;
 	FLOAT Attenuation;
+};
+
+struct Material
+{
+	ID3D11ShaderResourceView* AlbedoTexture = nullptr;
+	ID3D11ShaderResourceView* NormalMapTexture = nullptr;
+	ID3D11ShaderResourceView* SpecularMapTexture = nullptr;
+
+	XMFLOAT4 AmbientReflectivity;
+	XMFLOAT4 DiffuseReflectivity;
+	XMFLOAT4 SpecularReflectivity;
+	float SpecularPower; // Power to raise falloff by. Harshness of the light, basically.
 };
 
 struct ConstantBuffer
@@ -56,11 +67,14 @@ struct ConstantBuffer
 	XMFLOAT4 DiffMat;
 	XMFLOAT4 SpecMat;
 
-	int hasTextue;
+	int hasAlbedoTextue = 0;
+	int hasNormalMapTextue = 0;
+	int hasSpecularMapTextue = 0;
+
+	float specularPower;
 	
 	XMFLOAT3 EyePosW;
 
-	float mT;
 	int numPointLights;
 };
 

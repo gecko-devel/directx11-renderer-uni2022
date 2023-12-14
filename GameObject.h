@@ -6,22 +6,22 @@
 class GameObject
 {
 private:
-	ID3D11ShaderResourceView* _texture = nullptr;
 	MeshData _meshData;
-	XMFLOAT4 _color;
+	Material _material;
 
-	XMFLOAT4X4 _world;
 	XMFLOAT4X4 _trans;
 	XMFLOAT4X4 _rot;
 	XMFLOAT4X4 _scale;
+
+	XMFLOAT4X4 _world;
 
 public:
 	GameObject();
 
 	void Update();
 
-	void SetTexture(ID3D11ShaderResourceView* newTexture) { _texture = newTexture; }
 	void SetMeshData(MeshData newMeshData) { _meshData = newMeshData; }
+	void SetMaterial(Material newMaterial) { _material = newMaterial; }
 
 	void SetWorld(XMFLOAT4X4 newWorld) { _world = newWorld; }
 
@@ -29,12 +29,8 @@ public:
 	void SetRotation(XMFLOAT3 newRotation);
 	void SetScale(XMFLOAT3 newScale);
 
-	void SetColor(XMFLOAT4 newColor) { _color = newColor; }
-
-	ID3D11ShaderResourceView** GetTexture() { return &_texture; }
 	MeshData* GetMeshData() { return &_meshData; }
+	Material* GetMaterial() { return &_material; }
 	XMFLOAT4X4* GetWorld() { return &_world; }
-	XMFLOAT4 GetColor() { return _color; }
-
 };
 

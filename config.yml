@@ -1,47 +1,35 @@
 debugCamera:
-  position:
-    - 0.0
-    - 0.0
-    - -100.0
+  position: [0.0, 0.0, -100.0]
   speed: 60.0
+
+materials:
+  - name: "crate"
+    albedoPath: "textures\\Crate_COLOR.dds"
+    normalMapPath: "textures\\Crate_NORM.dds"
+    specularMapPath: "textures\\Crate_SPEC.dds"
+    ambient: [1.0, 1.0, 1.0, 1.0]
+    diffuse: [1.0, 1.0, 1.0, 1.0]
+    specular: [1.0, 1.0, 1.0, 1.0]
+    specularPower: 16.0
+
+  - name: "tbh"
+    albedoPath:
+    normalMapPath:
+    specularMapPath:
+    ambient: [1.0, 1.0, 1.0, 1.0]
+    diffuse: [1.0, 1.0, 1.0, 1.0]
+    specular: [1.0, 1.0, 1.0, 1.0]
+    specularPower: 4.0
 
 gameObjects:
   - modelPath: "models\\TBH.obj"
-    texturePath: ""
-    position:
-      - 0.0
-      - 0.0
-      - 0.0
-    scale:
-      - 0.5
-      - 0.5
-      - 0.5
-    rotation:
-      - 0.0
-      - -90.0
-      - 0.0
-    color:
-      - 1.0
-      - 0.0
-      - 1.0
-      - 1.0
+    material: "tbh"
+    position: [0.0, 0.0, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    rotation: [0.0, -90.0, 0.0]
 
   - modelPath: "models\\donut.obj"
-    texturePath: "textures\\Crate_COLOR.dds"
-    position:
-      - 0.0
-      - 0.0
-      - 0.0
-    scale:
-      - 40.0
-      - 40.0
-      - 40.0
-    rotation:
-      - 0.0
-      - 90.0
-      - 90.0
-    color:
-      - 1.0
-      - 1.0
-      - 1.0
-      - 1.0
+    material: "crate"
+    position: [0.0, 0.0, 0.0]
+    scale: [40.0, 40.0, 40.0]
+    rotation: [0.0, 90.0, 90.0]

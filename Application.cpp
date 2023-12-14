@@ -92,8 +92,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     _globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
     _globalLight.DiffuseLight = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
     _globalLight.SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    _globalLight.DirectionToLight = XMFLOAT3(-0.5f, 0.5f, 0.0f);
-    _globalLight.SpecularPower = 5.0f;
+    _globalLight.DirectionToLight = XMFLOAT4(-0.5f, 0.5f, 0.0f, 0.0f);
 
     // Add point lights
     PointLight pointLight1;
@@ -281,6 +280,50 @@ void Application::LoadConfig(std::string configPath)
 {
     _config = YAML::LoadFile(configPath);
 
+    // Read materials
+    // TODO: Maybe make each of these its own conversion function in Structures.h
+    for (YAML::Node matNode : _config["materials"])
+    {
+        Material material;
+
+        // Get albedo texture
+        std::string albedoPath = matNode["albedoPath"].as<std::string>();
+        if (albedoPath != "")
+        {
+            ID3D11ShaderResourceView* albedo;
+            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(albedoPath.begin(), albedoPath.end()).c_str(), nullptr, &albedo); // Read DDS image file and write data to stack
+            material.AlbedoTexture = albedo;
+        }
+
+        // Get normal map texture
+        std::string normalMapPath = matNode["normalMapPath"].as<std::string>();
+        if (normalMapPath != "")
+        {
+            ID3D11ShaderResourceView* normalMap;
+            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(normalMapPath.begin(), normalMapPath.end()).c_str(), nullptr, &normalMap); // Read DDS image file and write data to stack
+            material.AlbedoTexture = normalMap;
+        }
+
+        // Get specular map texture
+        std::string specularMapPath = matNode["specularMapPath"].as<std::string>();
+        if (specularMapPath != "")
+        {
+            ID3D11ShaderResourceView* specularMap;
+            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(specularMapPath.begin(), specularMapPath.end()).c_str(), nullptr, &specularMap); // Read DDS image file and write data to stack
+            material.AlbedoTexture = specularMap;
+        }
+
+        // Set reflectivity variables
+        material.AmbientReflectivity = matNode["ambient"].as<XMFLOAT4>();
+        material.DiffuseReflectivity = matNode["diffuse"].as<XMFLOAT4>();
+        material.SpecularReflectivity = matNode["specular"].as<XMFLOAT4>();
+        material.SpecularPower = matNode["specularPower"].as<float>();
+
+        // Add material to the map, called by its name
+        std::string matName = matNode["name"].as<std::string>();
+        _materials[matName] = material;
+    }
+
     // Read game objects
     for (YAML::Node goNode : _config["gameObjects"])
     {
@@ -290,16 +333,8 @@ void Application::LoadConfig(std::string configPath)
         // I HATE STRINGS AND THEIR MANY FORMS
         go->SetMeshData(OBJLoader::Load(const_cast<char*>(goNode["modelPath"].as<std::string>().c_str()), _pd3dDevice, false));
         
-        // Set texture
-       std::string texturePath = goNode["texturePath"].as<std::string>(); // convert to string literal. idk what the means tbh
-        // ^ THIS MIGHT NOT WORK
-       if (texturePath != "")
-        {
-            ID3D11ShaderResourceView* texture; // Make texture on stack
-            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(texturePath.begin(), texturePath.end()).c_str(), nullptr, &texture); // Read DDS image file and write data to stack
-
-            go->SetTexture(texture);
-        }
+        // Set material
+        go->SetMaterial(_materials[goNode["material"].as<std::string>()]);
 
         // Set position
         go->SetPosition(goNode["position"].as<XMFLOAT3>());
@@ -309,9 +344,6 @@ void Application::LoadConfig(std::string configPath)
 
         // Set Rot
         go->SetRotation(goNode["rotation"].as<XMFLOAT3>());
-
-        // Set colour
-        go->SetColor(goNode["color"].as<XMFLOAT4>());
 
         // Load gameobject into the vector
         _gameObjects.push_back(go);
@@ -625,23 +657,47 @@ void Application::Draw()
         cb.mProjection = XMMatrixTranspose(projection);
         cb.globalLight = _globalLight;
         std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.PointLights)); // copy pointlights to constant buffer
-        cb.AmbMat = go->GetColor();
-        cb.DiffMat = go->GetColor();
-        cb.SpecMat = go->GetColor();
+        cb.AmbMat = go->GetMaterial()->AmbientReflectivity;
+        cb.DiffMat = go->GetMaterial()->DiffuseReflectivity;
+        cb.SpecMat = go->GetMaterial()->SpecularReflectivity;
         cb.EyePosW = _currentCamera->GetPosition();
-        cb.mT = _t;
+        cb.specularPower = go->GetMaterial()->SpecularPower;
         cb.numPointLights = 2;
         
-        // Check for texture
-        if (*(go->GetTexture()) != nullptr)
+        // Check for albedo texture
+        if ((go->GetMaterial()->AlbedoTexture) != nullptr)
         {
             // Set the textures to use
-            _pImmediateContext->PSSetShaderResources(0, 1, go->GetTexture()); // Assign texture slot
-            cb.hasTextue = 1;
+            _pImmediateContext->PSSetShaderResources(0, 1, &go->GetMaterial()->AlbedoTexture); // Assign texture slot
+            cb.hasAlbedoTextue = 1;
         }
         else
         {
-            cb.hasTextue = 0;
+            cb.hasAlbedoTextue = 0;
+        }
+
+        // Check for normal map texture
+        if ((go->GetMaterial()->NormalMapTexture) != nullptr)
+        {
+            // Set the textures to use
+            _pImmediateContext->PSSetShaderResources(1, 1, &go->GetMaterial()->NormalMapTexture); // Assign texture slot
+            cb.hasNormalMapTextue = 1;
+        }
+        else
+        {
+            cb.hasNormalMapTextue = 0;
+        }
+
+        // Check for specular map texture
+        if ((go->GetMaterial()->SpecularMapTexture) != nullptr)
+        {
+            // Set the textures to use
+            _pImmediateContext->PSSetShaderResources(2, 1, &go->GetMaterial()->SpecularMapTexture); // Assign texture slot
+            cb.hasSpecularMapTextue = 1;
+        }
+        else
+        {
+            cb.hasSpecularMapTextue = 0;
         }
 
         // Update the shader variables using the constant buffer struct

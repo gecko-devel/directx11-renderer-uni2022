@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <windows.h>
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
@@ -50,10 +51,6 @@ private:
 	GlobalLight _globalLight;
 	PointLight _pointLights[20];
 
-	XMFLOAT4 _ambientMaterial;
-	XMFLOAT4 _diffuseMaterial;
-	XMFLOAT4 _specularMaterial;
-
 	// Texture vars
 	ID3D11ShaderResourceView* _pColorTextureRV = nullptr;
 	ID3D11ShaderResourceView* _pSpecularTextureRV = nullptr;
@@ -68,6 +65,9 @@ private:
 
 	// Config file
 	YAML::Node _config;
+
+	// Material map
+	std::map<std::string, Material> _materials;
 
 	// GameObject list
 	std::vector<GameObject*> _gameObjects;
