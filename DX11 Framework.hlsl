@@ -18,6 +18,12 @@ cbuffer ConstantBuffer : register( b0 )
     
     float4 DiffLight;
     float4 DiffMat;
+    
+    float4 SpecMat;
+    float4 SpecLight;
+    float3 EyePosW;
+    float SpecPower;
+    
     float3 DirToLight;
     
     float T;
@@ -29,6 +35,7 @@ struct VS_OUTPUT
     float4 Pos : SV_POSITION;
     float4 Color : COLOR0;
     float3 PosW : POSITION0;
+    float3 NormalW : NORMAL0;
 };
 
 //--------------------------------------------------------------------------------------
@@ -48,8 +55,10 @@ VS_OUTPUT VS( float3 Pos : POSITION, float3 Normal : NORMAL, float3 PosW : POSIT
     Normal = normalize(Normal);
     
     // Diffuse Lighting
-    float4 NormalW = mul(Normal, World);
+    float3 NormalW = mul(Normal, World);
     NormalW = normalize(NormalW);
+    
+    output.NormalW = NormalW;
     
     float4 potentialDiff = DiffLight * DiffMat;
     float difPercent = max(dot(normalize(DirToLight), normalize(NormalW)), 0);
@@ -70,5 +79,31 @@ VS_OUTPUT VS( float3 Pos : POSITION, float3 Normal : NORMAL, float3 PosW : POSIT
 //--------------------------------------------------------------------------------------
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-    return input.Color; //* input.PosW.y * sin(T);
+    
+    // Diffuse Lighting
+    float4 potentialDiff = DiffLight * DiffMat;
+    float difPercent = max(dot(normalize(DirToLight), normalize(input.NormalW)), 0);
+    
+    float DiffuseAmount = difPercent * potentialDiff;
+    
+    input.Color = DiffuseAmount * (DiffMat * DiffLight);
+    
+    // Ambient Lighting
+    input.Color += AmbLight * AmbMat;
+    
+    // Specular lighting - if I can do this, I can do whatever the hell I want
+    
+    float4 potentialSpecular = SpecLight * SpecMat;
+    
+    float3 viewerDir = normalize(EyePosW - input.PosW);
+    
+    float3 reflectDir = reflect(-DirToLight, input.NormalW);
+    reflectDir = normalize(reflectDir);
+    
+    float specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), SpecPower);
+    
+    input.Color += (potentialSpecular * specularIntensity);
+    
+    
+    return input.Color;
 }

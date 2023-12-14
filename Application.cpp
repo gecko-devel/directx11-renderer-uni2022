@@ -39,10 +39,6 @@ Application::Application()
 	_pCubeVertexBuffer = nullptr;
 	_pCubeIndexBuffer = nullptr;
 	_pConstantBuffer = nullptr;
-
-    DiffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    DiffuseMaterial = XMFLOAT4(0.5f, 1.0f, 1.0f, 1.0f);
-    directionToLight = XMFLOAT3(0.0f, 0.5f, -0.5f);
 }
 
 Application::~Application()
@@ -88,6 +84,11 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     DiffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     DiffuseMaterial = XMFLOAT4(0.5f, 1.0f, 1.0f, 1.0f);
     directionToLight = XMFLOAT3(0.0f, 0.5f, -0.5f);
+
+    SpecularLight = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+    SpecularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    SpecularPower = 5.0f;
+    XMStoreFloat3(&EyeWorldPos, Eye);
 
 	return S_OK;
 }
@@ -591,6 +592,10 @@ void Application::Draw()
     cb.DiffLight = DiffuseLight;
     cb.DiffMat = DiffuseMaterial;
     cb.DirToLight = directionToLight;
+    cb.SpecLight = SpecularLight;
+    cb.SpecMat = SpecularMaterial;
+    cb.SpecPower = SpecularPower;
+    cb.EyePosW = EyeWorldPos;
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 

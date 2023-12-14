@@ -29,6 +29,11 @@ struct ConstantBuffer
 	XMFLOAT4 DiffMat;
 	XMFLOAT3 DirToLight;
 
+	XMFLOAT4 SpecMat;
+	XMFLOAT4 SpecLight;
+	FLOAT SpecPower;
+	XMFLOAT3 EyePosW;
+
 	float mT;
 };
 
@@ -70,6 +75,12 @@ private:
 	XMFLOAT4 DiffuseMaterial;
 	XMFLOAT4 DiffuseLight;
 	XMFLOAT3 directionToLight;
+
+	// Specular vars
+	XMFLOAT4 SpecularMaterial;
+	XMFLOAT4 SpecularLight;
+	FLOAT SpecularPower; // Power to raise falloff by. Harshness of the light, basically.
+	XMFLOAT3 EyeWorldPos;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
