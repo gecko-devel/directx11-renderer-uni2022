@@ -95,12 +95,6 @@ gameObjects:
     scale: [1.0, 1.0, 1.0]
     rotation: [0.0, 0.0, 0.0]
 
-  - modelPath: "models\\sphere.obj"
-    material: "grass"
-    position: [0.0, 2.0, 3.0]
-    scale: [0.3, 0.3, 0.3]
-    rotation: [0.0, 0.0, 0.0]
-
 lighting:
   ambientLight: [0.2, 0.2, 0.2, 1]
 
@@ -114,8 +108,8 @@ lighting:
       attenuation: 1
 
   spotLights:
-  #  - position: [0, 2, 3]
-  #    color: [0, 1, 0, 1]
-  #    attenuation: 0.3
-  #    direction: [0, -1, 0]
-  #    spotAngle: 20 # degrees
+    - position: [2, 5, 0]
+      color: [0, 1, 0, 1]
+      attenuation: 2
+      direction: [0, -1, 0]
+      spotAngle: 10 # degrees

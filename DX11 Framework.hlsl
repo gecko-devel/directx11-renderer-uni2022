@@ -104,7 +104,6 @@ float4 Specular(Light light, float3 viewDirection, float3 directionToLight, floa
     float3 halfwayVector = normalize(directionToLight + viewDirection);
     float normalDotHalfway = max(0, dot(surfaceNormal, halfwayVector));
     return potentialSpecular * pow(normalDotHalfway, SpecularPower);
-    
 }
 
 float Attenuation(Light light, float distance)
@@ -190,10 +189,8 @@ float4 PS(VS_OUTPUT input) : SV_Target
         {
             case 0: // Directional Light
                 {
-                    float3 directionToLight = lights[i].Direction;
-        
-                    diffuse += Diffuse(lights[i], directionToLight, input.NormalW);
-                    specular += Specular(lights[i], viewerDir, directionToLight, input.NormalW, input.TexCoord);    
+                    diffuse += Diffuse(lights[i], lights[i].Direction, input.NormalW);
+                    specular += Specular(lights[i], viewerDir, lights[i].Direction, input.NormalW, input.TexCoord);
                 }
                 break;
             
@@ -213,7 +210,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
             case 2: // Spot Light
                 {
                     // Get direction of the light to the current pixel's world position
-                    float3 lightVector = lights[i].Position - input.PosW;
+                    float3 lightVector = normalize(lights[i].Position - input.PosW);
                     float distanceToLight = length(lightVector);
         
                     // Falloff as light vector gets close to maximum angle to normal
