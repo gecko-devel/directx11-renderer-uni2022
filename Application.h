@@ -36,8 +36,10 @@ private:
 	ID3D11VertexShader*     _pVertexShader;
 	ID3D11PixelShader*      _pPixelShader;
 	ID3D11InputLayout*      _pVertexLayout;
-	ID3D11Buffer*           _pVertexBuffer;
-	ID3D11Buffer*           _pIndexBuffer;
+	ID3D11Buffer*           _pCubeVertexBuffer;
+	ID3D11Buffer*			_pPyramidVertexBuffer;
+	ID3D11Buffer*           _pCubeIndexBuffer;
+	ID3D11Buffer*			_pPyramidIndexBuffer;
 	ID3D11Buffer*           _pConstantBuffer;
 	XMFLOAT4X4              _world, _world2, _world3;
 	XMFLOAT4X4              _view;

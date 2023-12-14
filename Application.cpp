@@ -36,8 +36,8 @@ Application::Application()
 	_pVertexShader = nullptr;
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
-	_pVertexBuffer = nullptr;
-	_pIndexBuffer = nullptr;
+	_pCubeVertexBuffer = nullptr;
+	_pCubeIndexBuffer = nullptr;
 	_pConstantBuffer = nullptr;
 }
 
@@ -175,7 +175,34 @@ HRESULT Application::InitVertexBuffer()
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = vertices;
 
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pVertexBuffer);
+    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pCubeVertexBuffer);
+
+    if (FAILED(hr))
+        return hr;
+
+    // Create vertex buffer
+    SimpleVertex pyramid_vertices[] =
+    {
+        { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, //0
+        { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, //1
+        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, //2
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, //3
+
+        { XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, // 4 - tip
+    };
+
+    D3D11_BUFFER_DESC pyramidBd;
+    ZeroMemory(&pyramidBd, sizeof(pyramidBd));
+    pyramidBd.Usage = D3D11_USAGE_DEFAULT;
+    pyramidBd.ByteWidth = sizeof(SimpleVertex) * 12;
+    pyramidBd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    pyramidBd.CPUAccessFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA PyramidInitData;
+    ZeroMemory(&PyramidInitData, sizeof(PyramidInitData));
+    PyramidInitData.pSysMem = pyramid_vertices;
+
+    hr = _pd3dDevice->CreateBuffer(&pyramidBd, &PyramidInitData, &_pPyramidVertexBuffer);
 
     if (FAILED(hr))
         return hr;
@@ -202,9 +229,6 @@ HRESULT Application::InitIndexBuffer()
         //left
         4,0,6,
         6,0,2,
-        // top
-        4,5,0,
-        0,5,1,
         // bottom
         2,3,6,
         6,3,7
@@ -221,7 +245,39 @@ HRESULT Application::InitIndexBuffer()
 	D3D11_SUBRESOURCE_DATA InitData;
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = indices;
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pIndexBuffer);
+    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pCubeIndexBuffer);
+
+    if (FAILED(hr))
+        return hr;
+
+    // Create index buffer
+    WORD pyramidIndices[] =
+    {
+        // back
+        4,3,2,
+        // right
+        4,2,0,
+        // front
+        4,0,1,
+        //left
+        4,1,3,
+        // bottom
+        3,2,0,
+        1,3,0
+    };
+
+    D3D11_BUFFER_DESC pyramidBd;
+    ZeroMemory(&pyramidBd, sizeof(pyramidBd));
+
+    pyramidBd.Usage = D3D11_USAGE_DEFAULT;
+    pyramidBd.ByteWidth = sizeof(WORD) * 36;
+    pyramidBd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    pyramidBd.CPUAccessFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA PyramidInitData;
+    ZeroMemory(&PyramidInitData, sizeof(PyramidInitData));
+    PyramidInitData.pSysMem = pyramidIndices;
+    hr = _pd3dDevice->CreateBuffer(&pyramidBd, &PyramidInitData, &_pPyramidIndexBuffer);
 
     if (FAILED(hr))
         return hr;
@@ -399,12 +455,12 @@ HRESULT Application::InitDevice()
     // Set vertex buffer
     UINT stride = sizeof(SimpleVertex);
     UINT offset = 0;
-    _pImmediateContext->IASetVertexBuffers(0, 1, &_pVertexBuffer, &stride, &offset);
+    _pImmediateContext->IASetVertexBuffers(0, 1, &_pPyramidVertexBuffer, &stride, &offset);
 
 	InitIndexBuffer();
 
     // Set index buffer
-    _pImmediateContext->IASetIndexBuffer(_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    _pImmediateContext->IASetIndexBuffer(_pPyramidIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     // Set primitive topology
     _pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -429,8 +485,8 @@ void Application::Cleanup()
     if (_pImmediateContext) _pImmediateContext->ClearState();
 
     if (_pConstantBuffer) _pConstantBuffer->Release();
-    if (_pVertexBuffer) _pVertexBuffer->Release();
-    if (_pIndexBuffer) _pIndexBuffer->Release();
+    if (_pCubeVertexBuffer) _pCubeVertexBuffer->Release();
+    if (_pCubeIndexBuffer) _pCubeIndexBuffer->Release();
     if (_pVertexLayout) _pVertexLayout->Release();
     if (_pVertexShader) _pVertexShader->Release();
     if (_pPixelShader) _pPixelShader->Release();
@@ -496,14 +552,25 @@ void Application::Draw()
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
+
+    UINT stride = sizeof(SimpleVertex);
+    UINT offset = 0;
+    _pImmediateContext->IASetVertexBuffers(0, 1, &_pPyramidVertexBuffer, &stride, &offset);
+    _pImmediateContext->IASetIndexBuffer(_pPyramidIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
     //
     // Renders a triangle
     //
+
+    //TODO: FIX CUBES MISSING BOTTOMS
 	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
 	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
 	_pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
-	_pImmediateContext->DrawIndexed(36, 0, 0);        
+	_pImmediateContext->DrawIndexed(18, 0, 0);        
+
+    _pImmediateContext->IASetVertexBuffers(0, 1, &_pCubeVertexBuffer, &stride, &offset);
+    _pImmediateContext->IASetIndexBuffer(_pCubeIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     world = XMLoadFloat4x4(&_world2);
     cb.mWorld = XMMatrixTranspose(world);
