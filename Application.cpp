@@ -715,5 +715,5 @@ void Application::Draw()
     //
     // Present our back buffer to our front buffer
     //
-    _pSwapChain->Present(0, 0);
+    _pSwapChain->Present(1, 0);
 }
