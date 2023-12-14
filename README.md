@@ -11,17 +11,16 @@ This small application is a project developed for university that involves learn
 Specifically, the following featuers have been implemented:
 
 - Reading from YAML to add materials, cameras, scenery, and other settings without recompiling.
-- Phong shading, including ambient, diffuse, and specular lighting.
+- Blinn-Phong shading, including ambient, diffuse, and specular lighting.
 - Materials include albedo and specular map textures with lighting interaction.
-- Point and Directional lights that use Phong shading, configurable via YAML.
+- Point, Spot, and Directional lights, configurable via YAML.
 - A free camera and normal camera, switchable using the number keys.
 - Pixel colour blending for translucent objects
-
-I am currently working on skyboxes, and potentially even basic heightmap terrain generation if time permits.
+- Fog that also uses colour blending.
 
 ## Credits
 
-- [yaml-cpp](https://github.com/jbeder/yaml-cpp) by Jesse Beder
+- [yaml-cpp](https://github.com/jbeder/yaml-cpp) by Jesse Beder is licenced under the MIT licence.
 - [Patchy Medow](https://freepbr.com/materials/patchy-meadow/) texture by freepbr.com
 - [Hand Sculpture](https://skfb.ly/oxY6x) by re1monsen is licensed under [Creative Commons Attribution](http://creativecommons.org/licenses/by/4.0/)
 - Base framework provided by the university, as seen in the first commit.
@@ -29,3 +28,4 @@ I am currently working on skyboxes, and potentially even basic heightmap terrain
 ![Screenshot](sc1.png)
 ![Screenshot](sc2.png)
 ![Screenshot](sc3.png)
+![Screenshot](sc4.png)
