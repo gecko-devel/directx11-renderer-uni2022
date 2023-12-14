@@ -1,4 +1,7 @@
 #include "Application.h"
+#include "include/yaml-cpp/yaml.h"
+
+//using namespace YAML;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -37,6 +40,8 @@ Application::Application()
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
 	_pConstantBuffer = nullptr;
+
+    YAML::Node config = YAML::LoadFile("config.yaml");
 
     _cameraSpeed = 30.0f;
 }
@@ -514,8 +519,9 @@ void Application::Update()
         _currentCamera = _cameras.at(1);
 
     // Get input vector from WASD + QE for up/down
-    _input = XMFLOAT3((int)GetAsyncKeyState(0x41) - (int)GetAsyncKeyState(0x44), (int)GetAsyncKeyState(0x51) - (int)GetAsyncKeyState(0x45), (int)GetAsyncKeyState(0x53) - (int)GetAsyncKeyState(0x57));
-    //                                      A                               D                            Q                            E                             W                             S
+    _input = XMFLOAT3((int)GetAsyncKeyState(0x41) - (int)GetAsyncKeyState(0x44), // A and D
+                      (int)GetAsyncKeyState(0x51) - (int)GetAsyncKeyState(0x45), // Q and E
+                      (int)GetAsyncKeyState(0x53) - (int)GetAsyncKeyState(0x57));// S and W
 
     // Animate the world
     XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t));
