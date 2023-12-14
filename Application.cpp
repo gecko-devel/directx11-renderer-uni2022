@@ -167,7 +167,7 @@ HRESULT Application::InitVertexBuffer()
     D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
     bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * 12;
+    bd.ByteWidth = sizeof(SimpleVertex) * 8;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 
@@ -194,7 +194,7 @@ HRESULT Application::InitVertexBuffer()
     D3D11_BUFFER_DESC pyramidBd;
     ZeroMemory(&pyramidBd, sizeof(pyramidBd));
     pyramidBd.Usage = D3D11_USAGE_DEFAULT;
-    pyramidBd.ByteWidth = sizeof(SimpleVertex) * 12;
+    pyramidBd.ByteWidth = sizeof(SimpleVertex) * 5;
     pyramidBd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     pyramidBd.CPUAccessFlags = 0;
 
@@ -229,6 +229,9 @@ HRESULT Application::InitIndexBuffer()
         //left
         4,0,6,
         6,0,2,
+        // top
+        4,5,0,
+        0,5,1,
         // bottom
         2,3,6,
         6,3,7
@@ -270,7 +273,7 @@ HRESULT Application::InitIndexBuffer()
     ZeroMemory(&pyramidBd, sizeof(pyramidBd));
 
     pyramidBd.Usage = D3D11_USAGE_DEFAULT;
-    pyramidBd.ByteWidth = sizeof(WORD) * 36;
+    pyramidBd.ByteWidth = sizeof(WORD) * 18;
     pyramidBd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     pyramidBd.CPUAccessFlags = 0;
 
@@ -567,8 +570,6 @@ void Application::Draw()
     //
     // Renders a triangle
     //
-
-    //TODO: FIX CUBES MISSING BOTTOMS
 	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
 	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
