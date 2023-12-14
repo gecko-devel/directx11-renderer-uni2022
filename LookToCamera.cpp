@@ -1,6 +1,6 @@
 #include "LookToCamera.h"
 
-LookToCamera::LookToCamera(XMFLOAT3 position, XMFLOAT3 up, XMFLOAT3 to, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth) : BaseCamera::BaseCamera(position, up, windowWidth, windowHeight, nearDepth, farDepth)
+LookToCamera::LookToCamera(XMFLOAT3 position, XMFLOAT3 up, XMFLOAT3 to, UINT windowWidth, UINT windowHeight, FLOAT nearDepth, FLOAT farDepth) : BaseCamera::BaseCamera(position, up, windowWidth, windowHeight, nearDepth, farDepth)
 {
 	_to = to;
 }

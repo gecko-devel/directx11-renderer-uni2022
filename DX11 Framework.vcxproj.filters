@@ -20,6 +20,8 @@
     <ClInclude Include="LookToCamera.h" />
     <ClInclude Include="LookAtCamera.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="FreelookCamera.h" />
+    <ClInclude Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -31,6 +33,8 @@
     <ClCompile Include="LookToCamera.cpp" />
     <ClCompile Include="LookAtCamera.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="FreelookCamera.cpp" />
+    <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

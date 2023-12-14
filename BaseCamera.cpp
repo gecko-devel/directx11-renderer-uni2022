@@ -1,6 +1,6 @@
 #include "BaseCamera.h"
 
-BaseCamera::BaseCamera(XMFLOAT3 position, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth)
+BaseCamera::BaseCamera(XMFLOAT3 position, XMFLOAT3 up, UINT windowWidth, UINT windowHeight, FLOAT nearDepth, FLOAT farDepth)
 {
 	_position = position;
 	_up = up;

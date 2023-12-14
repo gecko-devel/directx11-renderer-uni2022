@@ -187,10 +187,10 @@ void Application::ParseConfig(std::string configPath)
     _config = YAML::LoadFile(configPath);
 
     // Read cameras
+    BaseCamera* cam = nullptr;
+
     for (YAML::Node camNode : _config["cameras"])
     {
-        BaseCamera* cam = nullptr;
-
         std::string camType = camNode["type"].as<std::string>();
 
         XMFLOAT3 camPos = camNode["position"].as<XMFLOAT3>();
@@ -209,15 +209,23 @@ void Application::ParseConfig(std::string configPath)
             LookToCamera* lookToCam = new LookToCamera(camPos, camUp, camLook, _WindowWidth, _WindowHeight, camNear, camFar);
             cam = (BaseCamera*)lookToCam;
         }
+        else if (camType == "free")
+        {
+            float camSpeed = camNode["speed"].as<float>();
+            FreelookCamera* freeCam = new FreelookCamera(camPos, camUp, camLook, _WindowWidth, _WindowHeight, camNear, camFar, camSpeed);
+            cam = (BaseCamera*)freeCam;
+        }
         else
         {
             // Invalid camera!
             delete(cam);
+            cam = nullptr;
             continue;
         }
 
         _cameras.push_back(cam);
     }
+    cam = nullptr;
 
     // Read materials
     // TODO: Maybe make each of these its own conversion function in Structures.h
@@ -519,15 +527,6 @@ void Application::Update()
     // If 2 is pressed, switch to camera 1.
     if (GetAsyncKeyState(0x32))
         _currentCamera = _cameras.at(1);
-
-    // Get input vector from WASD + QE for up/down
-    _input = Input::Get3DInputVector();
-
-    // Move the Free camera
-    XMFLOAT3 freeCamPos = _cameras.at(0)->GetPosition();
-    XMFLOAT3 freeCamVelocity;
-    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * 10.0f * Time::GetDeltaTime());
-    _cameras.at(0)->SetPosition(XMFLOAT3(freeCamPos.x + freeCamVelocity.x, freeCamPos.y + freeCamVelocity.y, freeCamPos.z + freeCamVelocity.z));
 
     // Move the Orbit camera
     XMFLOAT3 orbitCamPos = _cameras.at(1)->GetPosition();

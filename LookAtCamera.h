@@ -3,7 +3,7 @@
 class LookAtCamera : BaseCamera
 {
 public:
-	LookAtCamera(XMFLOAT3 position, XMFLOAT3 up, XMFLOAT3 at, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth);
+	LookAtCamera(XMFLOAT3 position, XMFLOAT3 up, XMFLOAT3 at, UINT windowWidth, UINT windowHeight, FLOAT nearDepth, FLOAT farDepth);
 
 	void Update();
 

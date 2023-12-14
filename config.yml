@@ -1,10 +1,11 @@
 cameras:
-  - type: "to"
+  - type: "free"
     position: [0.0, 0.0, -30.0]
     up: [0.0, 1.0, 0.0]
     look: [0.0, 0.0, 1.0]
     near: 0.01
     far: 100.0
+    speed: 20.0
 
   - type: "at"
     position: [0.0, 0.0, -20.0]

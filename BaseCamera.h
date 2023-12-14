@@ -8,7 +8,7 @@ class BaseCamera
 {
 public:
 
-	BaseCamera(XMFLOAT3 position, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth);
+	BaseCamera(XMFLOAT3 position, XMFLOAT3 up, UINT windowWidth, UINT windowHeight, FLOAT nearDepth, FLOAT farDepth);
 	~BaseCamera();
 
 	// To have the camera move every frame.

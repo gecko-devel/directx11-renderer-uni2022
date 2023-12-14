@@ -12,6 +12,7 @@
 #include "BaseCamera.h"
 #include "LookToCamera.h"
 #include "LookAtCamera.h"
+#include "FreelookCamera.h"
 #include "GameObject.h"
 #include "Input.h"
 #include "Time.h"
