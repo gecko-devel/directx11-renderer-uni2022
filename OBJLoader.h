@@ -9,15 +9,6 @@
 
 using namespace DirectX;
 
-struct MeshData
-{
-	ID3D11Buffer * VertexBuffer;
-	ID3D11Buffer * IndexBuffer;
-	UINT VBStride;
-	UINT VBOffset;
-	UINT IndexCount;
-};
-
 namespace OBJLoader
 {
 	//The only method you'll need to call

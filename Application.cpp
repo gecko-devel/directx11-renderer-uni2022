@@ -69,7 +69,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
 
     // Initialize the view matrix
-	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -3.0f, 0.0f);
+	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -30.0f, 0.0f);
 	XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -229,33 +229,6 @@ HRESULT Application::InitVertexBuffer()
     if (FAILED(hr))
         return hr;
 
-    // Create vertex buffer
-    SimpleVertex pyramid_vertices[] =
-    {
-        { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) }, //0
-        { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) }, //1
-        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) }, //2
-        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) }, //3
-
-        { XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) ,XMFLOAT2(0.5f, 0.0f) }, // 4 - tip
-    };
-
-    D3D11_BUFFER_DESC pyramidBd;
-    ZeroMemory(&pyramidBd, sizeof(pyramidBd));
-    pyramidBd.Usage = D3D11_USAGE_DEFAULT;
-    pyramidBd.ByteWidth = sizeof(SimpleVertex) * 5;
-    pyramidBd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    pyramidBd.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA PyramidInitData;
-    ZeroMemory(&PyramidInitData, sizeof(PyramidInitData));
-    PyramidInitData.pSysMem = pyramid_vertices;
-
-    hr = _pd3dDevice->CreateBuffer(&pyramidBd, &PyramidInitData, &_pPyramidVertexBuffer);
-
-    if (FAILED(hr))
-        return hr;
-
 	return S_OK;
 }
 
@@ -298,38 +271,6 @@ HRESULT Application::InitIndexBuffer()
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = indices;
     hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pCubeIndexBuffer);
-
-    if (FAILED(hr))
-        return hr;
-
-    // Create index buffer
-    WORD pyramidIndices[] =
-    {
-        // back
-        4,3,2,
-        // right
-        4,2,0,
-        // front
-        4,0,1,
-        //left
-        4,1,3,
-        // bottom
-        2,3,0,
-        3,1,0
-    };
-
-    D3D11_BUFFER_DESC pyramidBd;
-    ZeroMemory(&pyramidBd, sizeof(pyramidBd));
-
-    pyramidBd.Usage = D3D11_USAGE_DEFAULT;
-    pyramidBd.ByteWidth = sizeof(WORD) * 18;
-    pyramidBd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    pyramidBd.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA PyramidInitData;
-    ZeroMemory(&PyramidInitData, sizeof(PyramidInitData));
-    PyramidInitData.pSysMem = pyramidIndices;
-    hr = _pd3dDevice->CreateBuffer(&pyramidBd, &PyramidInitData, &_pPyramidIndexBuffer);
 
     if (FAILED(hr))
         return hr;
@@ -508,16 +449,6 @@ HRESULT Application::InitDevice()
 
 	InitVertexBuffer();
 
-    // Set vertex buffer
-    UINT stride = sizeof(SimpleVertex);
-    UINT offset = 0;
-    _pImmediateContext->IASetVertexBuffers(0, 1, &_pPyramidVertexBuffer, &stride, &offset);
-
-	InitIndexBuffer();
-
-    // Set index buffer
-    _pImmediateContext->IASetIndexBuffer(_pPyramidIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
     // Set primitive topology
     _pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -593,13 +524,9 @@ void Application::Update()
     }
 
     //
-    // Animate the cube
+    // Animate the YIPPEE
     //
-    XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationX(_t));
-
-    XMStoreFloat4x4(&_world2, XMMatrixScaling(0.2f, 0.2f, 0.2f) * XMMatrixRotationZ(_t / 2) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(_t / 2));
-
-    XMStoreFloat4x4(&_world3, XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationZ(_t * 2) * XMMatrixTranslation(0.6f, 0.0f, 0.0f) * XMMatrixRotationY(-_t * 3) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(_t / 2));
+    XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t));
 }
 
 void Application::Draw()
@@ -612,6 +539,7 @@ void Application::Draw()
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
     _pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+    // Set the world, view, and projection matrices
 	XMMATRIX world = XMLoadFloat4x4(&_world);
 	XMMATRIX view = XMLoadFloat4x4(&_view);
 	XMMATRIX projection = XMLoadFloat4x4(&_projection);
@@ -637,37 +565,21 @@ void Application::Draw()
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
-
     UINT stride = sizeof(SimpleVertex);
     UINT offset = 0;
-    _pImmediateContext->IASetVertexBuffers(0, 1, &yippeeMeshData.VertexBuffer, &yippeeMeshData.VBStride, &yippeeMeshData.VBOffset);
-    _pImmediateContext->IASetIndexBuffer(yippeeMeshData.VertexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     cb.AmbMat = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
+    // Set vertex and index buffers to draw the model
+    _pImmediateContext->IASetVertexBuffers(0, 1, &yippeeMeshData.VertexBuffer, &yippeeMeshData.VBStride, &yippeeMeshData.VBOffset);
+    _pImmediateContext->IASetIndexBuffer(yippeeMeshData.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    // Set the shaders to use
+    _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
 	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
+    // Send in the constant buffer to the shaders
 	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
-	_pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
+    // DRAW!
 	_pImmediateContext->DrawIndexed(yippeeMeshData.IndexCount, 0, 0);        
-
-    _pImmediateContext->IASetVertexBuffers(0, 1, &_pCubeVertexBuffer, &stride, &offset);
-    _pImmediateContext->IASetIndexBuffer(_pCubeIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
-    cb.AmbMat = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
-
-    world = XMLoadFloat4x4(&_world2);
-    cb.mWorld = XMMatrixTranspose(world);
-    _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-    _pImmediateContext->DrawIndexed(36, 0, 0);
-
-
-    cb.AmbMat = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
-
-    world = XMLoadFloat4x4(&_world3);
-    cb.mWorld = XMMatrixTranspose(world);
-    _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-    _pImmediateContext->DrawIndexed(36, 0, 0);
 
     //
     // Present our back buffer to our front buffer

@@ -46,7 +46,7 @@ void OBJLoader::CreateIndices(const std::vector<XMFLOAT3>& inVertices,
 		else //if not found, add it to the buffer
 		{
 			outVertices.push_back(vertex.Pos);
-			//outTexCoords.push_back(vertex.TexC);
+			outTexCoords.push_back(vertex.TexC);
 			outNormals.push_back(vertex.Normal);
 			
 			unsigned short newIndex = (unsigned short)outVertices.size() - 1;
