@@ -27,3 +27,5 @@ I am currently working on skyboxes, and potentially even basic heightmap terrain
 - Base framework provided by the university, as seen in the first commit.
 
 ![Screenshot](sc1.png)
+![Screenshot](sc2.png)
+![Screenshot](sc3.png)
