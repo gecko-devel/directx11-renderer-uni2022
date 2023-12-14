@@ -22,7 +22,7 @@ XMFLOAT3 Input::Get3DInputVector()
 
 int Input::GetXAxis()
 {
-    return (int)(bool)GetAsyncKeyState(VK_UP) - (int)(bool)GetAsyncKeyState(VK_DOWN); // Down and Up arrows
+    return (int)(bool)GetAsyncKeyState(VK_DOWN) - (int)(bool)GetAsyncKeyState(VK_UP); // Down and Up arrows
 }
 
 int Input::GetYAxis()

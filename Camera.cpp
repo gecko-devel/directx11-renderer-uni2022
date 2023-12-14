@@ -20,6 +20,7 @@ Camera::~Camera() {}
 
 void Camera::Update()
 {
+	XMStoreFloat4x4(&_view, XMMatrixLookToLH(XMLoadFloat3(&_pos), XMLoadFloat3(&_forward), XMLoadFloat3(&_up)));
 	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XMConvertToRadians(70.0f), (float)_windowWidth / (float)_windowHeight, _nearDepth, _farDepth));
 }
 
@@ -43,12 +44,16 @@ void Camera::RotateEulerAngles(XMFLOAT3 rotationAxes)
 	XMStoreFloat3(&_up, XMVector3TransformNormal(XMLoadFloat3(&_up), rot));
 	XMStoreFloat3(&_forward, XMVector3TransformNormal(XMLoadFloat3(&_forward), rot));
 
+	XMStoreFloat3(&_right, XMVector3Normalize(XMLoadFloat3(&_right)));
+	XMStoreFloat3(&_up, XMVector3Normalize(XMLoadFloat3(&_up)));
+	XMStoreFloat3(&_forward, XMVector3Normalize(XMLoadFloat3(&_forward)));
+
+
 	XMStoreFloat4x4(&_view, XMMatrixLookToLH(XMLoadFloat3(&_pos), XMLoadFloat3(&_forward), XMLoadFloat3(&_up)));
 }
 
 void Camera::Move(XMFLOAT3 velocity)
 {
-
 	XMStoreFloat3(&_pos, XMLoadFloat3(&_pos) + XMLoadFloat3(&velocity));
 }
 

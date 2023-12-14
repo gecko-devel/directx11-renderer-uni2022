@@ -11,15 +11,19 @@ FreeCamera::~FreeCamera() {}
 
 void FreeCamera::Update()
 {
+	// Translation
 	MoveZ(Input::GetVerticalAxis() * _speed * Time::GetDeltaTime());
 	MoveX(Input::GetHorizontalAxis() * _speed * Time::GetDeltaTime());
 	MoveY(Input::GetUpDownAxis() * _speed * Time::GetDeltaTime());
 
+
+	// Rotation
 	XMFLOAT2 rotationInput = Input::GetLookInputVector();
 	XMFLOAT2 rotationalVelocity;
-	XMStoreFloat2(&rotationalVelocity, XMVector3Normalize(XMLoadFloat2(&rotationInput)) * _rotationSpeed * Time::GetDeltaTime());	
-	RotateEulerAngles(XMFLOAT3(rotationalVelocity.x, rotationalVelocity.y, 0.0f));
-	
+	XMStoreFloat2(&rotationalVelocity, XMVector3Normalize(XMLoadFloat2(&rotationInput)) * _rotationSpeed * Time::GetDeltaTime());
+
+	Pitch(rotationalVelocity.x);
+	Yaw(rotationalVelocity.y);
 
 	Camera::Update();
 }
