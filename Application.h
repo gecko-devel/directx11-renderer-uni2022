@@ -9,6 +9,7 @@
 #include "OBJLoader.h"
 #include "Structures.h"
 #include "Camera.h"
+#include "GameObject.h"
 #include "yaml-cpp/yaml.h"
 
 
@@ -60,18 +61,19 @@ private:
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
-	// Imported model
-	MeshData _yippeeMeshData;
-
 	// Input vector
 	XMFLOAT3 _input;
 
 	FLOAT _cameraSpeed;
 
 	// Config file
-	YAML::Node config;
+	YAML::Node _config;
+
+	// GameObject list
+	std::vector<GameObject*> _gameObjects;
 
 private:
+	void LoadConfig(std::string configPath);
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
 	void Cleanup();

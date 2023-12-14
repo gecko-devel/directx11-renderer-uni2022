@@ -62,7 +62,7 @@ struct ConstantBuffer
 	int numPointLights;
 };
 
-// Conversion function for YAML to XMFLOAT3, yoinked and edited from here:
+// Conversion functions for YAML yoinked and edited from here:
 // https://github.com/jbeder/yaml-cpp/wiki/Tutorial#converting-tofrom-native-data-types
 namespace YAML
 {
@@ -88,6 +88,34 @@ namespace YAML
 			rhs.x = node[0].as<float>();
 			rhs.y = node[1].as<float>();
 			rhs.z = node[2].as<float>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<XMFLOAT4>
+	{
+		static Node encode(const XMFLOAT4& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.push_back(rhs.z);
+			node.push_back(rhs.w);
+			return node;
+		}
+
+		static bool decode(const Node& node, XMFLOAT4& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 4)
+			{
+				return false;
+			}
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			rhs.z = node[2].as<float>();
+			rhs.w = node[3].as<float>();
 			return true;
 		}
 	};

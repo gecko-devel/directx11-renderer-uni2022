@@ -41,8 +41,6 @@ Application::Application()
 	_pConstantBuffer = nullptr;
 
     _cameraSpeed = 30.0f;
-
-    config = YAML::LoadFile("config.yml");
 }
 
 Application::~Application()
@@ -72,6 +70,9 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	// Initialize the world matrix
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
 
+    // Load the config values and create gameobjects
+    LoadConfig("config.yml");
+
     // Make cameras
     XMFLOAT3 cameraPos = XMFLOAT3(0.0f, 0.0f, -30.0f);
     XMFLOAT3 cameraAt = XMFLOAT3(0.0f, 0.0f, 1.0f);
@@ -81,7 +82,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
 
     // Load config values into first camera
-    XMFLOAT3 yamlCameraPos = config["debug-camera"]["position"].as<XMFLOAT3>();
+    XMFLOAT3 yamlCameraPos = _config["debugCamera"]["position"].as<XMFLOAT3>();
     _cameras.push_back(new Camera(yamlCameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::To));
     // Use values above for second camera
     _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::At));
@@ -106,24 +107,6 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     pointLight2.Color = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
     pointLight2.Attenuation = 0.01f;
     _pointLights[1] = pointLight2;
-
-    // Define materials for the lights. Remove this later when encapsulated.
-    _ambientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    _diffuseMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    _specularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-    // Texture initialisation
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pColorTextureRV);
-    _pImmediateContext->PSSetShaderResources(0, 1, &_pColorTextureRV);
-
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_SPEC.dds", nullptr, &_pSpecularTextureRV);
-    _pImmediateContext->PSSetShaderResources(1, 1, &_pSpecularTextureRV);
-
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_NORM.dds", nullptr, &_pNormalTextureRV);
-    _pImmediateContext->PSSetShaderResources(2, 1, &_pNormalTextureRV);
-
-    // Import yippee OBJ
-    _yippeeMeshData = OBJLoader::Load("models/TBH.obj", _pd3dDevice, false);
 
     // Create mip-map sampler using DirectX 11
     D3D11_SAMPLER_DESC sampDesc;
@@ -292,6 +275,50 @@ HRESULT Application::InitIndexBuffer()
         return hr;
 
 	return S_OK;
+}
+
+void Application::LoadConfig(std::string configPath)
+{
+    _config = YAML::LoadFile(configPath);
+    int textureSlotI = 0;
+
+    // Read game objects
+    for (YAML::Node goNode : _config["gameObjects"])
+    {
+        GameObject* go = new GameObject();
+
+        // Set mesh
+        // I HATE STRINGS AND THEIR MANY FORMS
+        go->SetMeshData(OBJLoader::Load(const_cast<char*>(goNode["modelPath"].as<std::string>().c_str()), _pd3dDevice, false));
+        
+        // Set texture
+       std::string texturePath = goNode["texturePath"].as<std::string>(); // convert to string literal. idk what the means tbh
+        // ^ THIS MIGHT NOT WORK
+       if (texturePath != "")
+        {
+            ID3D11ShaderResourceView* texture; // Make texture on stack
+            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(texturePath.begin(), texturePath.end()).c_str(), nullptr, &texture); // Read DDS image file and write data to stack
+            _pImmediateContext->PSSetShaderResources(textureSlotI, 1, &texture); // Assign resource a slot
+
+            go->SetTexture(texture);
+
+            textureSlotI++;
+        }
+
+        // Set position
+        go->SetPosition(goNode["position"].as<XMFLOAT3>());
+
+        // Set scale
+        go->SetScale(goNode["scale"].as<XMFLOAT3>());
+
+        // TODO: Set rotation, too!
+
+        // Set colour
+        go->SetColor(goNode["color"].as<XMFLOAT4>());
+
+        // Load gameobject into the vector
+        _gameObjects.push_back(go);
+    }
 }
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
@@ -557,7 +584,7 @@ void Application::Update()
     // Move the Free camera
     XMFLOAT3 freeCamPos = _cameras.at(0)->GetPosition();
     XMFLOAT3 freeCamVelocity;
-    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * (config["debug-camera"]["speed"].as<float>() * _deltaTime));
+    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * (_config["debugCamera"]["speed"].as<float>() * _deltaTime));
     _cameras.at(0)->SetPosition(XMFLOAT3(freeCamPos.x + freeCamVelocity.x, freeCamPos.y + freeCamVelocity.y, freeCamPos.z + freeCamVelocity.z));
 
     // Move the Orbit camera
@@ -578,44 +605,52 @@ void Application::Draw()
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
     _pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    // Set the world, view, and projection matrices
-	XMMATRIX world = XMLoadFloat4x4(&_world);
-	XMMATRIX view = XMLoadFloat4x4(&_currentCamera->GetView());
-	XMMATRIX projection = XMLoadFloat4x4(&_currentCamera->GetProjection());
+    // Set the view and projection matrices for later
+    XMMATRIX view = XMLoadFloat4x4(&_currentCamera->GetView());
+    XMMATRIX projection = XMLoadFloat4x4(&_currentCamera->GetProjection());
 
-    //
-    // Update variables
-    //
-    ConstantBuffer cb;
-	cb.mWorld = XMMatrixTranspose(world);
-	cb.mView = XMMatrixTranspose(view);
-	cb.mProjection = XMMatrixTranspose(projection);
-    cb.globalLight = _globalLight;
-    std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.PointLights));
-    cb.AmbMat = _ambientMaterial;
-    cb.DiffMat = _diffuseMaterial;
-    cb.SpecMat = _specularMaterial;
-    cb.EyePosW = _currentCamera->GetPosition();
-    cb.mT = _t;
-    cb.numPointLights = 2;
+    // Render the gameobjects!
+    for (GameObject* go : _gameObjects)
+    {
+        // Set the world matrix
+        XMMATRIX world = XMLoadFloat4x4(go->GetWorld());
 
-	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+        // Make a constant buffer template with new shader variable values
+        ConstantBuffer cb;
+        cb.mWorld = XMMatrixTranspose(world);
+        cb.mView = XMMatrixTranspose(view);
+        cb.mProjection = XMMatrixTranspose(projection);
+        cb.globalLight = _globalLight;
+        std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.PointLights)); // copy pointlights to constant buffer
+        cb.AmbMat = go->GetColor();
+        cb.DiffMat = go->GetColor();
+        cb.SpecMat = go->GetColor();
+        cb.EyePosW = _currentCamera->GetPosition();
+        cb.mT = _t;
+        cb.numPointLights = 2;
 
-    UINT stride = sizeof(SimpleVertex);
-    UINT offset = 0;
+        // Update the shader variables using the constant buffer struct
+        _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
-    cb.AmbMat = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    // Set vertex and index buffers to draw the model
-    _pImmediateContext->IASetVertexBuffers(0, 1, &_yippeeMeshData.VertexBuffer, &_yippeeMeshData.VBStride, &_yippeeMeshData.VBOffset);
-    _pImmediateContext->IASetIndexBuffer(_yippeeMeshData.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-    // Set the shaders to use
-    _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
-	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
-    // Send in the constant buffer to the shaders
-	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
-    _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
-    // DRAW!
-	_pImmediateContext->DrawIndexed(_yippeeMeshData.IndexCount, 0, 0);        
+        UINT stride = sizeof(SimpleVertex);
+        UINT offset = 0;
+
+        // Set vertex and index buffers to draw the model
+        _pImmediateContext->IASetVertexBuffers(0, 1, &go->GetMeshData()->VertexBuffer, &go->GetMeshData()->VBStride, &go->GetMeshData()->VBOffset);
+        _pImmediateContext->IASetIndexBuffer(go->GetMeshData()->IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+        // Set the shaders to use
+        _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
+        _pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
+
+        // Send in the constant buffer to the shaders
+        _pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
+        _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
+
+        // DRAW!
+        _pImmediateContext->DrawIndexed(go->GetMeshData()->IndexCount, 0, 0);
+    }
+        
 
     //
     // Present our back buffer to our front buffer
