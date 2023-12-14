@@ -487,6 +487,13 @@ HRESULT Application::InitDevice()
     if (FAILED(hr))
         return hr;
 
+    D3D11_RASTERIZER_DESC wfdesc;
+    ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
+    wfdesc.FillMode = D3D11_FILL_WIREFRAME;
+    wfdesc.CullMode = D3D11_CULL_NONE;
+    hr = _pd3dDevice->CreateRasterizerState(&wfdesc, &_wireframe);
+
+
     return S_OK;
 }
 
@@ -527,6 +534,16 @@ void Application::Update()
             dwTimeStart = dwTimeCur;
 
         _t = (dwTimeCur - dwTimeStart) / 1000.0f;
+    }
+
+    if (GetAsyncKeyState(0x4B))
+    {
+        _pImmediateContext->RSSetState(_wireframe);
+    }
+
+    if (GetAsyncKeyState(0x4C))
+    {
+        _pImmediateContext->RSSetState(nullptr);
     }
 
     //
