@@ -48,6 +48,8 @@ cbuffer ConstantBuffer : register( b0 )
     float4 AmbMat;
     float4 DiffMat;    
     float4 SpecMat;
+    
+    bool hasTexture;
 
     float3 EyePosW;
     
@@ -127,8 +129,6 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // PointLight
     // ----------------
     
-    // TODO: Somehow find a way to loop through arrays
-    // The number 2 here represents how many point lights I *know* will be there. Which is bad.
     for (int i = 0; i < numPointLights; i++)
     {
         float3 directionToPointLight = normalize(PointLights[i].pos - input.PosW);
@@ -150,8 +150,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // ----------------
     // Texturing
     // ----------------
-    //float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
-    //input.Color *= textureColor;
+    if (hasTexture == true)
+    {
+        float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
+        input.Color *= textureColor;
+    }
     
     return input.Color;
 }

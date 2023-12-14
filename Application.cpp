@@ -280,7 +280,6 @@ HRESULT Application::InitIndexBuffer()
 void Application::LoadConfig(std::string configPath)
 {
     _config = YAML::LoadFile(configPath);
-    int textureSlotI = 0;
 
     // Read game objects
     for (YAML::Node goNode : _config["gameObjects"])
@@ -298,11 +297,8 @@ void Application::LoadConfig(std::string configPath)
         {
             ID3D11ShaderResourceView* texture; // Make texture on stack
             CreateDDSTextureFromFile(_pd3dDevice, std::wstring(texturePath.begin(), texturePath.end()).c_str(), nullptr, &texture); // Read DDS image file and write data to stack
-            _pImmediateContext->PSSetShaderResources(textureSlotI, 1, &texture); // Assign resource a slot
 
             go->SetTexture(texture);
-
-            textureSlotI++;
         }
 
         // Set position
@@ -635,6 +631,18 @@ void Application::Draw()
         cb.EyePosW = _currentCamera->GetPosition();
         cb.mT = _t;
         cb.numPointLights = 2;
+        
+        // Check for texture
+        if (*(go->GetTexture()) != nullptr)
+        {
+            // Set the textures to use
+            _pImmediateContext->PSSetShaderResources(0, 1, go->GetTexture()); // Assign texture slot
+            cb.hasTextue = 1;
+        }
+        else
+        {
+            cb.hasTextue = 0;
+        }
 
         // Update the shader variables using the constant buffer struct
         _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
@@ -652,7 +660,7 @@ void Application::Draw()
 
         // Send in the constant buffer to the shaders
         _pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
-        _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
+        _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);        
 
         // DRAW!
         _pImmediateContext->DrawIndexed(go->GetMeshData()->IndexCount, 0, 0);

@@ -55,6 +55,8 @@ struct ConstantBuffer
 	XMFLOAT4 AmbMat;
 	XMFLOAT4 DiffMat;
 	XMFLOAT4 SpecMat;
+
+	int hasTextue;
 	
 	XMFLOAT3 EyePosW;
 

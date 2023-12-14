@@ -12,8 +12,8 @@ private:
 
 	XMFLOAT4X4 _world;
 	XMFLOAT4X4 _trans;
-	XMFLOAT4X4 _scale;
 	XMFLOAT4X4 _rot;
+	XMFLOAT4X4 _scale;
 
 public:
 	GameObject();
@@ -26,14 +26,15 @@ public:
 	void SetWorld(XMFLOAT4X4 newWorld) { _world = newWorld; }
 
 	void SetPosition(XMFLOAT3 newPosition);
-	void SetScale(XMFLOAT3 newScale);
 	void SetRotation(XMFLOAT3 newRotation);
+	void SetScale(XMFLOAT3 newScale);
 
 	void SetColor(XMFLOAT4 newColor) { _color = newColor; }
 
-	ID3D11ShaderResourceView** GetShaderResource() { return &_texture; }
+	ID3D11ShaderResourceView** GetTexture() { return &_texture; }
 	MeshData* GetMeshData() { return &_meshData; }
 	XMFLOAT4X4* GetWorld() { return &_world; }
 	XMFLOAT4 GetColor() { return _color; }
+
 };
 
