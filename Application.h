@@ -73,6 +73,7 @@ private:
 	// GameObject list
 	std::vector<GameObject*> _gameObjects;
 	std::vector<GameObject*> _translucentGameObjects;
+	std::vector<GameObject*> _orderedGameObjects;
 
 	void ParseConfig(std::string configPath);
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);

@@ -1,11 +1,11 @@
 cameras:
   - type: "free"
-    position: [0.0, 0.0, -30.0]
+    position: [0.0, 0.0, -10.0]
     up: [0.0, 1.0, 0.0]
     look: [0.0, 0.0, 1.0]
     near: 0.01
     far: 100.0
-    speed: 20.0
+    speed: 10.0
 
   - type: "at"
     position: [0.0, 0.0, -20.0]
@@ -25,12 +25,12 @@ materials:
     specularPower: 3.0
     isTranslucent: false
 
-  - name: "crate-transparent "
+  - name: "crate-transparent"
     albedoPath: "textures\\Crate_COLOR_TRANSLUCENT.dds"
-    #normalMapPath: "textures\\Crate_NORM.dds"
-    normalMapPath: ""
-    #specularMapPath: "textures\\Crate_SPEC.dds"
-    specularMapPath: ""
+    normalMapPath: "textures\\Crate_NORM.dds"
+    #normalMapPath: ""
+    specularMapPath: "textures\\Crate_SPEC.dds"
+    #specularMapPath: ""
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]

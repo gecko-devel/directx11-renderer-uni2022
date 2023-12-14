@@ -115,7 +115,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     translucentDesc.RenderTarget[0].BlendEnable = true;
 
     translucentDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA; // Set factor to alpha so that it becomes translucent
-    translucentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_DEST_ALPHA; // Set to -alpha so the two can be added together to make a mixed, full colour
+    translucentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA; // Set to (- source alpha) so the two can be added together to make a mixed, full colour
     translucentDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; // Specify to add the two blended colours together
 
     translucentDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE; // Only use the alpha channel of the source colour...
@@ -565,6 +565,23 @@ void Application::Update()
 {
     Time::Update();
 
+    // Sort GameObjects into order of distance to camera and tranclucency:
+
+    // OK, pause. I know you're wondering why there are is a lambda here.
+    // Don't worry about it. It's all okay. Everything is fine.
+    // 
+    // (functors scared me)
+   
+    std::sort(_translucentGameObjects.begin(),
+        _translucentGameObjects.end(),
+        [this](GameObject* lhs, GameObject* rhs)
+        {
+            return CompareDistanceToCamera(lhs, rhs);
+        });
+
+    _orderedGameObjects = _gameObjects;
+    _orderedGameObjects.insert(_orderedGameObjects.end(), _translucentGameObjects.begin(), _translucentGameObjects.end());
+
     // If K is pressed, go to wireframe render state.
     if (GetAsyncKeyState(0x4B))
         _pImmediateContext->RSSetState(_wireframe);
@@ -589,10 +606,10 @@ void Application::Update()
     _currentCamera->Update();
 
     // Spin cube
-    _gameObjects[0]->RotateOnAxes(XMFLOAT3(0.0, 10.0 * Time::GetDeltaTime(), 0.0));
+    _translucentGameObjects[0]->RotateOnAxes(XMFLOAT3(0.0, 10.0 * Time::GetDeltaTime(), 0.0));
 
     // Update GameObjects
-    for (GameObject* go : _gameObjects)
+    for (GameObject* go : _orderedGameObjects)
     {
         go->Update();
     }
@@ -613,31 +630,8 @@ void Application::Draw()
     XMMATRIX projection = XMLoadFloat4x4(&_currentCamera->GetProjection());
 
     // Render the gameobjects!
-    // Firstly, sort them into order of distance to camera and tranclucency:
-    std::vector<GameObject*> orderedGameObjects;
 
-    // OK, pause. I know you're wondering why there are lambdas here.
-    // Don't worry about it. It's all okay. Everything is fine.
-    // 
-    // (functors scared me)
-    std::sort(_gameObjects.begin(),
-              _gameObjects.end(),
-              [this](GameObject* lhs, GameObject* rhs)
-              {
-                  return CompareDistanceToCamera(lhs, rhs);
-              });
-
-    std::sort(_translucentGameObjects.begin(),
-              _translucentGameObjects.end(),
-              [this](GameObject* lhs, GameObject* rhs)
-              {
-                  return CompareDistanceToCamera(lhs, rhs);
-              });
-
-    orderedGameObjects.insert(orderedGameObjects.end(), _gameObjects.begin(), _gameObjects.end());
-    orderedGameObjects.insert(orderedGameObjects.end(), _translucentGameObjects.begin(), _translucentGameObjects.end());
-
-    for (GameObject* go : orderedGameObjects)
+    for (GameObject* go : _orderedGameObjects)
     {
         // Set the world matrix
         XMMATRIX world = XMLoadFloat4x4(go->GetWorld());

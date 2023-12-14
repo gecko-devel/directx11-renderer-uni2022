@@ -187,9 +187,18 @@ float4 PS(VS_OUTPUT input) : SV_Target
     {
         float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
         totalColor *= textureColor;
+        
+        // Translucency
+        totalColor.a = textureColor.a * DiffMat.a;
+
+    }
+    else
+    {
+        // Translucency
+        totalColor.a = DiffMat.a;
     }
 
-    totalColor += specular;
+    totalColor.rgb += specular.rgb;
     
     return totalColor;
 }
