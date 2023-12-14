@@ -1,9 +1,9 @@
 #include "Camera.h"
 
-Camera::Camera(XMFLOAT3 position, XMFLOAT3 at, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth)
+Camera::Camera(XMFLOAT3 position, XMFLOAT3 to, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth)
 {
 	_position = position;
-	_at = at;
+	_to = to;
 	_up = up;
 	_windowHeight = windowHeight;
 	_windowWidth = windowWidth;
@@ -19,10 +19,10 @@ void Camera::Update()
 {
 	// Create the view matrix
 	XMVECTOR positionVec = XMVectorSet(_position.x, _position.y, _position.z, 0.0f);
-	XMVECTOR atVec = XMVectorSet(_at.x, _at.y, _at.z, 0.0f);
+	XMVECTOR toVec = XMVectorSet(_to.x, _to.y, _to.z, 0.0f);
 	XMVECTOR upVec = XMVectorSet(_up.x, _up.y, _up.z, 0.0f);
 
-	XMStoreFloat4x4(&_view, XMMatrixLookAtLH(positionVec, atVec, upVec));
+	XMStoreFloat4x4(&_view, XMMatrixLookToLH(positionVec, toVec, upVec));
 
 	// Create the projection matrix
 	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _windowWidth / _windowHeight, 0.01f, 100.0f));
@@ -33,9 +33,9 @@ void Camera::SetPosition(XMFLOAT3 newPosition)
 	_position = newPosition;
 }
 
-void Camera::SetAt(XMFLOAT3 newAt)
+void Camera::SetTo(XMFLOAT3 newTo)
 {
-	_at = newAt;
+	_to = newTo;
 }
 
 void Camera::SetUp(XMFLOAT3 newUp)

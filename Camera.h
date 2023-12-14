@@ -7,7 +7,7 @@ using namespace DirectX;
 class Camera
 {
 public:
-	Camera(XMFLOAT3 position, XMFLOAT3 at, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth);
+	Camera(XMFLOAT3 position, XMFLOAT3 to, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth);
 	~Camera();
 
 	// To have the camera move every frame.
@@ -16,8 +16,8 @@ public:
 	void SetPosition(XMFLOAT3 newPosition);
 	XMFLOAT3 GetPosition() { return _position; }
 
-	void SetAt(XMFLOAT3 newAt);
-	XMFLOAT3 GetAt() { return _at; }
+	void SetTo(XMFLOAT3 newTo);
+	XMFLOAT3 GetTo() { return _to; }
 
 	void SetUp(XMFLOAT3 newUp);
 	XMFLOAT3 GetUp() { return _up; }
@@ -32,7 +32,7 @@ public:
 private:
 	// Camera projection values
 	XMFLOAT3 _position;
-	XMFLOAT3 _at;
+	XMFLOAT3 _to;
 	XMFLOAT3 _up;
 
 	FLOAT _windowHeight;
