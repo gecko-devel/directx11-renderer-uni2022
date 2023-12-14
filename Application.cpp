@@ -75,12 +75,8 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Read the config and generate objects within
     ParseConfig("config.yml");
 
-    // Load config values into first camera
-    XMFLOAT3 yamlCameraPos = _config["debugCamera"]["position"].as<XMFLOAT3>();
-    _cameras.push_back(new BaseCamera(yamlCameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar));
-    // Use values above for second camera
-    _cameras.push_back(new BaseCamera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar));
-    _currentCamera = _cameras.at(0);
+    // Set current camera
+    _currentCamera = _cameras[0];
 
     // Make Global Light
     _globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
@@ -208,6 +204,19 @@ void Application::ParseConfig(std::string configPath)
             LookAtCamera* lookAtCam = new LookAtCamera(camPos, camUp, camLook, _WindowWidth, _WindowHeight, camNear, camFar);
             cam = (BaseCamera*)lookAtCam;
         }
+        else if (camType == "to")
+        {
+            LookToCamera* lookToCam = new LookToCamera(camPos, camUp, camLook, _WindowWidth, _WindowHeight, camNear, camFar);
+            cam = (BaseCamera*)lookToCam;
+        }
+        else
+        {
+            // Invalid camera!
+            delete(cam);
+            continue;
+        }
+
+        _cameras.push_back(cam);
     }
 
     // Read materials
@@ -540,7 +549,7 @@ void Application::Update()
     // Move the Free camera
     XMFLOAT3 freeCamPos = _cameras.at(0)->GetPosition();
     XMFLOAT3 freeCamVelocity;
-    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * (_config["debugCamera"]["speed"].as<float>() * _deltaTime));
+    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * 10.0f * _deltaTime);
     _cameras.at(0)->SetPosition(XMFLOAT3(freeCamPos.x + freeCamVelocity.x, freeCamPos.y + freeCamVelocity.y, freeCamPos.z + freeCamVelocity.z));
 
     // Move the Orbit camera
