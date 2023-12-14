@@ -313,6 +313,7 @@ void Application::ParseConfig(std::string configPath)
 
     // Read lights
     int i = 0;
+
     for (YAML::Node dlNode : _config["lighting"]["directionalLights"])
     {
         Light light;
@@ -349,13 +350,12 @@ void Application::ParseConfig(std::string configPath)
         light.Position = slNode["position"].as<XMFLOAT3>();
         light.Attenuation = slNode["attenuation"].as<float>();
         light.Direction = slNode["direction"].as<XMFLOAT3>();
-        light.SpotAngle = slNode["maxAngle"].as<float>();
+        light.SpotAngle = slNode["spotAngle"].as<float>();
 
         _lights[i] = light;
         i++;
     }
     _numLights = i;
-
 }
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
@@ -638,24 +638,20 @@ void Application::Draw()
         ConstantBuffer cb;
         cb.World = XMMatrixTranspose(world);
         cb.View = XMMatrixTranspose(view);
-
         cb.Projection = XMMatrixTranspose(projection);
 
         cb.AmbientLight = _ambientLight;
 
         cb.fog = _fog;
 
-        std::copy(std::begin(_lights), std::end(_lights), std::begin(cb.lights)); // copy lights to constant buffer
-        cb.numLights = _numLights;
+        std::copy(std::begin(_lights), &_lights[_numLights], std::begin(cb.lights)); // copy lights to constant buffer
 
         cb.AmbMat = go->GetMaterial()->AmbientReflectivity;
         cb.DiffMat = go->GetMaterial()->DiffuseReflectivity;
         cb.SpecMat = go->GetMaterial()->SpecularReflectivity;
 
-        cb.specularPower = go->GetMaterial()->SpecularPower;
-
         cb.EyePosW = _currentCamera->GetPosition();
-        
+
         // Check for albedo texture
         if ((go->GetMaterial()->AlbedoTexture) != nullptr)
         {
@@ -679,6 +675,10 @@ void Application::Draw()
         {
             cb.hasSpecularMapTextue = 0;
         }
+
+        cb.numLights = _numLights;
+
+        cb.specularPower = go->GetMaterial()->SpecularPower;
 
         // Update the shader variables using the constant buffer struct
         _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);

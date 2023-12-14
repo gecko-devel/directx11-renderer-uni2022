@@ -19,13 +19,10 @@ struct Light
     float3 Direction;
     int LightType;
     // -------------- 16 bytes
-    // Below is used by point light and spot light
     float3 Position;
     float Attenuation;
     // -------------- 16 bytes
-    // Below is ONLY used by spot light
     float SpotAngle;
-    // Light type and padding
     float3 _padding;
     // -------------- 16 bytes
 };
@@ -80,7 +77,7 @@ cbuffer ConstantBuffer : register( b0 )
     
     float SpecularPower;
 
-    float1 _padding;
+    float _padding;
     // ----------- 16 bytes
 }
 
@@ -193,7 +190,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
         {
             case 0: // Directional Light
                 {
-                    float3 directionToLight = -lights[i].Direction;
+                    float3 directionToLight = lights[i].Direction;
         
                     diffuse += Diffuse(lights[i], directionToLight, input.NormalW);
                     specular += Specular(lights[i], viewerDir, directionToLight, input.NormalW, input.TexCoord);    
@@ -221,7 +218,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
         
                     // Falloff as light vector gets close to maximum angle to normal
                     // Most code is derived (not directly copied) from here: https://www.3dgep.com/texturing-lighting-directx-11/#Spotlight_Cone
-                    float minCos = cos(lights[i].SpotAngle);
+                    float minCos = cos(radians(lights[i].SpotAngle));
                     float maxCos = (minCos + 1.0f) / 2.0f;
                     float cosAngle = dot(lights[i].Direction, -lightVector);
                     float spotIntensity = smoothstep(minCos, maxCos, cosAngle);
@@ -261,7 +258,6 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // The fog is coming
     float distanceToCamera = distance(input.PosW, EyePosW);
     float fogLerp = saturate((distanceToCamera - fog.Start) / fog.Range);
-    
     litColor = lerp(litColor, fog.Color, fogLerp);
     
     return litColor;

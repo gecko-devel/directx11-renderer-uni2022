@@ -30,6 +30,8 @@ public:
 	XMFLOAT4 Color;
 	float Start;
 	float Range;
+private:
+	XMFLOAT2 _padding;
 };
 
 struct MeshData
@@ -43,18 +45,18 @@ struct MeshData
 
 struct Light
 {
+public:
 	XMFLOAT4 Color;
 	// -------------- 16 bytes
 	XMFLOAT3 Direction;
 	LightType lightType;
 	// -------------- 16 bytes
-	// Below is used by point light and spot light
 	XMFLOAT3 Position;
 	FLOAT Attenuation;
 	// -------------- 16 bytes
-	// Below only used by spot light
 	FLOAT SpotAngle;
-	// Remainder 8 bytes will get added by HLSL
+private:
+	XMFLOAT3 _padding;
 };
 
 struct Material
@@ -94,6 +96,8 @@ struct ConstantBuffer
 	int numLights;
 
 	float specularPower;
+
+	float _padding;
 };
 
 // Conversion functions for YAML yoinked and edited from here:
