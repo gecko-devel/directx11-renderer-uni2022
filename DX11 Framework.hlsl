@@ -189,8 +189,8 @@ float4 PS(VS_OUTPUT input) : SV_Target
         {
             case 0: // Directional Light
                 {
-                    diffuse += Diffuse(lights[i], lights[i].Direction, input.NormalW);
-                    specular += Specular(lights[i], viewerDir, lights[i].Direction, input.NormalW, input.TexCoord);
+                    diffuse += Diffuse(lights[i], normalize(lights[i].Direction), input.NormalW);
+                    specular += Specular(lights[i], viewerDir, normalize(lights[i].Direction), input.NormalW, input.TexCoord);
                 }
                 break;
             
@@ -218,7 +218,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
                     // Most code is derived (not directly copied) from here: https://www.3dgep.com/texturing-lighting-directx-11/#Spotlight_Cone
                     float minCos = cos(radians(lights[i].SpotAngle));
                     float maxCos = (minCos + 1.0f) / 2.0f;
-                    float cosAngle = dot(lights[i].Direction, -lightVector);
+                    float cosAngle = dot(normalize(lights[i].Direction), -lightVector);
                     float spotIntensity = smoothstep(minCos, maxCos, cosAngle);
                 
                     float attenuation = Attenuation(lights[i], distanceToLight);
