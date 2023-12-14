@@ -2,6 +2,7 @@
 #include <d3d11_1.h>
 #include <DirectXMath.h>
 #include "Structures.h"
+#include "BaseCamera.h"
 
 class GameObject
 {
@@ -34,5 +35,7 @@ public:
 	MeshData* GetMeshData() { return &_meshData; }
 	Material* GetMaterial() { return &_material; }
 	XMFLOAT4X4* GetWorld() { return &_world; }
+	XMFLOAT3 GetPosition();
+	float GetDistanceToCamera(BaseCamera* camera);
 };
 

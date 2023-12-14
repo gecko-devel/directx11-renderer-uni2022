@@ -50,6 +50,8 @@ struct Material
 	XMFLOAT4 DiffuseReflectivity;
 	XMFLOAT4 SpecularReflectivity;
 	float SpecularPower; // Power to raise falloff by. Harshness of the light, basically.
+
+	bool IsTranslucent = false;
 };
 
 struct ConstantBuffer

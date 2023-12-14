@@ -25,6 +25,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+// Sort gameobject distance to camera in descending order
+bool Application::CompareDistanceToCamera(GameObject* i1, GameObject* i2)
+{
+    float i1Distance;
+    XMStoreFloat(&i1Distance, XMVector3Length(XMLoadFloat3(&i1->GetPosition()) - XMLoadFloat3(&_currentCamera->GetPosition())));
+
+    float i2Distance;
+    XMStoreFloat(&i2Distance, XMVector3Length(XMLoadFloat3(&i2->GetPosition()) - XMLoadFloat3(&_currentCamera->GetPosition())));
+
+    return i1Distance < i2Distance;
+}
+
 Application::Application()
 {
 	_hInst = nullptr;
@@ -94,8 +106,32 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Assign texture sampler to the shader register, so it knows to use it
     _pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
 
-    // Create Blend State
-    _pd3dDevice->CreateBlendState()
+    // Create blend state descriptor
+    D3D11_BLEND_DESC translucentDesc;
+    ZeroMemory(&translucentDesc, sizeof(translucentDesc));
+    translucentDesc.AlphaToCoverageEnable = false;
+    translucentDesc.IndependentBlendEnable = false;
+
+    translucentDesc.RenderTarget[0].BlendEnable = true;
+
+    translucentDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA; // Set factor to alpha so that it becomes translucent
+    translucentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_DEST_ALPHA; // Set to -alpha so the two can be added together to make a mixed, full colour
+    translucentDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; // Specify to add the two blended colours together
+
+    translucentDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE; // Only use the alpha channel of the source colour...
+    translucentDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO; // ...and not the destination.
+    translucentDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD; // Add them together - it's just 1 + 0, but it stops the blend from using 1 * 0.
+    
+    translucentDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL; // Allow the blend to action on *all* colour values.
+    
+
+    // Create Blend State from the descriptor
+    _pd3dDevice->CreateBlendState(&translucentDesc, &_pTransparentBlendState);
+
+    // Specify empty and fake manual blend factor so that it sets the blend state nicely (directx is pedantic) and set the state at initialisation time.
+    // The *real* blend factors are already specified in the render target's SrcBlend, DestBlend, and alpha variants of both.
+    float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    _pImmediateContext->OMSetBlendState(_pTransparentBlendState, blendFactor, 0xffffffff);
 
 	return S_OK;
 }
@@ -250,6 +286,9 @@ void Application::ParseConfig(std::string configPath)
         material.SpecularReflectivity = matNode["specular"].as<XMFLOAT4>();
         material.SpecularPower = matNode["specularPower"].as<float>();
 
+        // Set translucent var
+        material.IsTranslucent = matNode["isTranslucent"].as<bool>();
+
         // Add material to the map, called by its name
         std::string matName = matNode["name"].as<std::string>();
         _materials[matName] = material;
@@ -260,15 +299,22 @@ void Application::ParseConfig(std::string configPath)
     {
         GameObject* go = new GameObject();
 
-        // I HATE STRINGS AND THEIR MANY FORMS
         go->SetMeshData(OBJLoader::Load(const_cast<char*>(goNode["modelPath"].as<std::string>().c_str()), _pd3dDevice, false));
         go->SetMaterial(_materials[goNode["material"].as<std::string>()]);
         go->SetPosition(goNode["position"].as<XMFLOAT3>());
         go->SetScale(goNode["scale"].as<XMFLOAT3>());
         go->SetRotation(goNode["rotation"].as<XMFLOAT3>());
 
-        // Load gameobject into the vector
-        _gameObjects.push_back(go);
+        // Sort translucent objects
+        if (go->GetMaterial()->IsTranslucent)
+        {
+            _translucentGameObjects.push_back(go);
+        }
+        else
+        {
+            // Load gameobject into the vector
+            _gameObjects.push_back(go);
+        }
     }
 
     // Read ambient light
@@ -567,7 +613,31 @@ void Application::Draw()
     XMMATRIX projection = XMLoadFloat4x4(&_currentCamera->GetProjection());
 
     // Render the gameobjects!
-    for (GameObject* go : _gameObjects)
+    // Firstly, sort them into order of distance to camera and tranclucency:
+    std::vector<GameObject*> orderedGameObjects;
+
+    // OK, pause. I know you're wondering why there are lambdas here.
+    // Don't worry about it. It's all okay. Everything is fine.
+    // 
+    // (functors scared me)
+    std::sort(_gameObjects.begin(),
+              _gameObjects.end(),
+              [this](GameObject* lhs, GameObject* rhs)
+              {
+                  return CompareDistanceToCamera(lhs, rhs);
+              });
+
+    std::sort(_translucentGameObjects.begin(),
+              _translucentGameObjects.end(),
+              [this](GameObject* lhs, GameObject* rhs)
+              {
+                  return CompareDistanceToCamera(lhs, rhs);
+              });
+
+    orderedGameObjects.insert(orderedGameObjects.end(), _gameObjects.begin(), _gameObjects.end());
+    orderedGameObjects.insert(orderedGameObjects.end(), _translucentGameObjects.begin(), _translucentGameObjects.end());
+
+    for (GameObject* go : orderedGameObjects)
     {
         // Set the world matrix
         XMMATRIX world = XMLoadFloat4x4(go->GetWorld());

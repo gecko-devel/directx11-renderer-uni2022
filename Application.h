@@ -58,7 +58,7 @@ private:
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
-	ID3D11BlendState* _pBlendOverAlpha = nullptr;
+	ID3D11BlendState* _pTransparentBlendState = nullptr;
 
 	// Input vector
 	XMFLOAT3 _input;
@@ -72,6 +72,7 @@ private:
 
 	// GameObject list
 	std::vector<GameObject*> _gameObjects;
+	std::vector<GameObject*> _translucentGameObjects;
 
 	void ParseConfig(std::string configPath);
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
@@ -83,6 +84,7 @@ private:
 	UINT _WindowHeight;
 	UINT _WindowWidth;
 
+	bool CompareDistanceToCamera(GameObject* i1, GameObject* i2);
 public:
 	Application();
 	~Application();
@@ -91,5 +93,8 @@ public:
 
 	void Update();
 	void Draw();
+
+	// Comparator for order checking
+	
 };
 

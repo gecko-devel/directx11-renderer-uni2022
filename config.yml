@@ -23,6 +23,19 @@ materials:
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 3.0
+    isTranslucent: false
+
+  - name: "crate-transparent "
+    albedoPath: "textures\\Crate_COLOR_TRANSLUCENT.dds"
+    #normalMapPath: "textures\\Crate_NORM.dds"
+    normalMapPath: ""
+    #specularMapPath: "textures\\Crate_SPEC.dds"
+    specularMapPath: ""
+    ambient: [1.0, 1.0, 1.0, 1.0]
+    diffuse: [1.0, 1.0, 1.0, 1.0]
+    specular: [1.0, 1.0, 1.0, 1.0]
+    specularPower: 3.0
+    isTranslucent: true
 
   - name: "tbh"
     albedoPath: ""
@@ -32,10 +45,11 @@ materials:
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 3.0
+    isTranslucent: false
 
 gameObjects:
   - modelPath: "models\\cube.obj"
-    material: "crate"
+    material: "crate-transparent"
     position: [3.0, 0.0, 0.0]
     scale: [1.0, 1.0, 1.0]
     rotation: [0.0, 0.0, 0.0]
