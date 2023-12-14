@@ -5,7 +5,7 @@ cameras:
     look: [0.0, 0.0, 1.0]
     near: 0.01
     far: 100.0
-    speed: 10.0
+    speed: 3.0
 
   - type: "at"
     position: [0.0, 0.0, -20.0]
@@ -28,19 +28,17 @@ materials:
   - name: "crate-transparent"
     albedoPath: "textures\\Crate_COLOR_TRANSLUCENT.dds"
     normalMapPath: "textures\\Crate_NORM.dds"
-    #normalMapPath: ""
     specularMapPath: "textures\\Crate_SPEC.dds"
-    #specularMapPath: ""
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 3.0
     isTranslucent: true
 
-  - name: "tbh"
-    albedoPath: ""
+  - name: "hand"
+    albedoPath: "textures\\hand_albedo.dds"
     normalMapPath: ""
-    specularMapPath: ""
+    specularMapPath: "textures\\hand_spec.dds"
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
@@ -54,11 +52,11 @@ gameObjects:
     scale: [1.0, 1.0, 1.0]
     rotation: [0.0, 0.0, 0.0]
     
-  - modelPath: "models\\TBH.obj"
-    material: "tbh"
-    position: [0.0, 0.0, -6.0]
-    scale: [1.0, 1.0, 1.0]
-    rotation: [0.0, 0.0, 0.0]
+  - modelPath: "models\\hand.obj"
+    material: "hand"
+    position: [0.0, -1.0, -2.0]
+    scale: [2.0, 2.0, 2.0]
+    rotation: [0.0, 180.0, 0.0]
 
 # Lighting
 lighting:
@@ -69,9 +67,9 @@ lighting:
       color: [0.7, 0.7, 0.7, 1.0]
 
   pointLights:
-    - position: [0.0, 0.0, 0.0]
-      color: [0.0, 1.0, 0.0, 1.0]
-      attenuation: 0.3
+    #- position: [0.0, 0.0, 0.0]
+    #  color: [0.0, 1.0, 0.0, 1.0]
+    #  attenuation: 0.3
 
     - position: [0.0, 0.0, -5.5]
       color: [1.0, 1.0, 1.0, 1.0]

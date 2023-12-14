@@ -19,10 +19,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		DDSTextureLoader.cpp = DDSTextureLoader.cpp
 		DDSTextureLoader.h = DDSTextureLoader.h
 		models\donut.obj = models\donut.obj
+		models\hand.obj = models\hand.obj
+		textures\hand_albedo.dds = textures\hand_albedo.dds
+		models\hand_mirrored.obj = models\hand_mirrored.obj
+		textures\hand_spec.dds = textures\hand_spec.dds
 		OBJLoader.cpp = OBJLoader.cpp
 		OBJLoader.h = OBJLoader.h
 		models\sphere.obj = models\sphere.obj
 		models\TBH.obj = models\TBH.obj
+		textures\uv_checker_albedo.dds = textures\uv_checker_albedo.dds
 	EndProjectSection
 EndProject
 Global
