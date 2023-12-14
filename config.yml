@@ -19,7 +19,7 @@ materials:
     albedoPath: "textures\\Crate_COLOR.dds"
     normalMapPath: "textures\\Crate_NORM.dds"
     specularMapPath: "textures\\Crate_SPEC.dds"
-    ambient: [0.2, 0.2, 0.2, 1.0]
+    ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 3.0
@@ -28,7 +28,7 @@ materials:
     albedoPath: ""
     normalMapPath: ""
     specularMapPath: ""
-    ambient: [0.2, 0.2, 0.2, 0.2]
+    ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 3.0
@@ -46,11 +46,19 @@ gameObjects:
     scale: [1.0, 1.0, 1.0]
     rotation: [0.0, 0.0, 0.0]
 
-pointLights:
-  - position: [0.0, 0.0, 0.0]
-    color: [0.0, 1.0, 0.0, 1.0]
-    attenuation: 0.3
+# Lighting
+lighting:
+  ambientLight: [0.2, 0.2, 0.2, 1]
 
-  - position: [0.0, 0.0, -5.5]
-    color: [1.0, 1.0, 1.0, 1.0]
-    attenuation: 0.3
+  directionalLights:
+    - direction: [-0.5, 0.5, 0.0]
+      color: [0.7, 0.7, 0.7, 1.0]
+
+  pointLights:
+    - position: [0.0, 0.0, 0.0]
+      color: [0.0, 1.0, 0.0, 1.0]
+      attenuation: 0.3
+
+    - position: [0.0, 0.0, -5.5]
+      color: [1.0, 1.0, 1.0, 1.0]
+      attenuation: 0.3

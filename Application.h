@@ -48,7 +48,9 @@ private:
 	std::vector<BaseCamera*> _cameras;
 
 	// lighting vars
-	GlobalLight _globalLight;
+	XMFLOAT4 _ambientLight;
+
+	DirectionalLight _directionalLights[20];
 	PointLight _pointLights[20];
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;

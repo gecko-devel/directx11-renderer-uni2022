@@ -27,12 +27,10 @@ struct MeshData
 	UINT IndexCount;
 };
 
-struct GlobalLight
+struct DirectionalLight
 {
-	XMFLOAT4 AmbientLight;
-	XMFLOAT4 DiffuseLight;
-	XMFLOAT4 SpecularLight;
-	XMFLOAT4 DirectionToLight;
+	XMFLOAT4 Color;
+	XMFLOAT3 Direction;
 };
 
 struct PointLight
@@ -60,7 +58,9 @@ struct ConstantBuffer
 	XMMATRIX mView;
 	XMMATRIX mProjection;
 
-	GlobalLight globalLight;
+	XMFLOAT4 ambientLight;
+
+	DirectionalLight directionalLights[20];
 	PointLight PointLights[20];
 
 	XMFLOAT4 AmbMat;

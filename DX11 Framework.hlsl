@@ -13,12 +13,10 @@ Texture2D texSpec : register(t2);
 
 SamplerState sampLinear : register(s0);
 
-struct GlobalLight
+struct DirectionalLight
 {
-    float4 AmbLight;
-    float4 DiffLight;
-    float4 SpecLight;
-    float4 DirectionToLight;
+    float4 Color;
+    float4 Direction;
 };
 
 struct PointLight
@@ -37,7 +35,9 @@ cbuffer ConstantBuffer : register( b0 )
 	matrix View;
 	matrix Projection;
     
-    GlobalLight mGlobalLight;
+    float4 ambientLight;
+    
+    DirectionalLight directionalLights[20];
     PointLight PointLights[20];
     
     float4 AmbMat;
@@ -104,13 +104,13 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // ----------------
     // GlobalLight
     // ----------------
-    // Diffuse Lighting
+    // Diffuse
     float4 potentialDiff = mGlobalLight.DiffLight * DiffMat;
     float difPercent = max(dot(normalize(mGlobalLight.DirectionToLight), normalize(input.NormalW)), 0);
     float DiffuseAmount = difPercent * potentialDiff;
     diffuse += DiffuseAmount * (DiffMat * mGlobalLight.DiffLight);
     
-    // Specular lighting
+    // Specular
     float4 potentialSpecular;
     
     if (hasSpecularMapTexture)
@@ -125,7 +125,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     specular += (potentialSpecular * specularIntensity);
     
     // ----------------
-    // PointLight
+    // PointLights
     // ----------------
     
     for (int i = 0; i < numPointLights; i++)
