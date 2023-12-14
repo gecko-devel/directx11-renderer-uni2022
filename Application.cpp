@@ -96,9 +96,11 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Texture initialisation
     CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pColorTextureRV);
     _pImmediateContext->PSSetShaderResources(0, 1, &_pColorTextureRV);
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Create_SPEC.dds", nullptr, &_pSpecularTextureRV);
+
+    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_SPEC.dds", nullptr, &_pSpecularTextureRV);
     _pImmediateContext->PSSetShaderResources(1, 1, &_pSpecularTextureRV);
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Create_NORM.dds", nullptr, &_pNormalTextureRV);
+
+    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_NORM.dds", nullptr, &_pNormalTextureRV);
     _pImmediateContext->PSSetShaderResources(2, 1, &_pNormalTextureRV);
 
     // Create mip-map sampler using DirectX 11
