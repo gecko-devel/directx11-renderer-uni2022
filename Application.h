@@ -50,9 +50,11 @@ private:
 
 	DirectionalLight _directionalLights[20];
 	PointLight _pointLights[20];
+	SpotLight _spotLights[20];
 
 	int _numDirectionalLights;
 	int _numPointLights;
+	int _numSpotLights;
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
@@ -90,8 +92,5 @@ public:
 
 	void Update();
 	void Draw();
-
-	// Comparator for order checking
-	
 };
 

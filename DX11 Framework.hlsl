@@ -9,7 +9,6 @@
 //--------------------------------------------------------------------------------------
 Texture2D texDiffuse : register(t0);
 Texture2D texSpec : register(t1);
-Texture2D texSpec : register(t2);
 
 SamplerState sampLinear : register(s0);
 
@@ -26,9 +25,20 @@ struct PointLight
     float attenuation;
 };
 
+struct SpotLight
+{
+    float4 color;
+    float3 direction;
+    float maxAngle;
+    float3 pos;
+    float attenuation;
+    float4 _padding;
+};
+
+
 struct Fog
 {
-    float2 padding;
+    float2 _padding;
     float Start;
     float Range;
     float4 Color;
@@ -43,6 +53,8 @@ cbuffer ConstantBuffer : register( b0 )
 	matrix View;
 	matrix Projection;
     
+    SpotLight SpotLights[20];
+    
     float4 ambientLight;
     
     Fog fog;
@@ -50,16 +62,16 @@ cbuffer ConstantBuffer : register( b0 )
     DirectionalLight directionalLights[20];
     PointLight PointLights[20];
     
-    
     float4 AmbMat;
     float4 DiffMat;    
     float4 SpecMat;
     
     bool hasAlbedoTexture;
-    bool hasNormalMapTexture;
     bool hasSpecularMapTexture;
     
     float specularPower;
+    
+    int numSpotLights;
 
     float3 EyePosW;
     
@@ -154,7 +166,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
         else
             potentialSpecular = directionalLights[i].Color * SpecMat;
         
-        // Blinn-phon
+        // Blinn-Phong
         float3 halfwayDir = normalize(directionalLights[i].Direction + viewerDir);
         float specularIntensity = pow(max(dot(input.NormalW, halfwayDir), 0), specularPower);
         specular += (potentialSpecular * specularIntensity);
@@ -188,12 +200,50 @@ float4 PS(VS_OUTPUT input) : SV_Target
         specular += (potentialSpecular * specularIntensity) * pointLightIntensity;
     }
     
+    // Spotlights
+    for (int k = 0; k < numSpotLights; k++)
+    {
+        // Get direction of the light to the current pixel's world position
+        float3 lightVector = normalize(SpotLights[k].pos - input.PosW);
+        
+        // Falloff as light vector gets close to maximum angle to normal
+        // Most code is derived (not directly copied) from here: https://www.3dgep.com/texturing-lighting-directx-11/#Spotlight_Cone
+        float minCos = cos(SpotLights[k].maxAngle);
+        float maxCos = (minCos + 1.0f) / 2.0f;
+        float cosAngle = dot(SpotLights[k].direction, -lightVector);
+        float spotIntensity = smoothstep(minCos, maxCos, cosAngle);
+        
+        // Calculate attenuation
+        
+        float distanceToSpotLight = length(SpotLights[k].pos - input.PosW);
+
+        float attenuationFactor = 1.0f / (1.0f + pow(SpotLights[k].attenuation * lightVector, 2.0f));
+        
+        // Diffuse
+        float4 potentialDiff = SpotLights[k].color * DiffMat;
+        float difPercent = max(dot(normalize(lightVector), normalize(input.NormalW)), 0);
+        float DiffuseAmount = difPercent * potentialDiff;
+        diffuse += (DiffuseAmount * (DiffMat * SpotLights[k].color)) * attenuationFactor * spotIntensity;
+        
+        // Specular
+        float4 potentialSpecular;
+        
+        if (hasSpecularMapTexture)
+            potentialSpecular = SpotLights[k].color * texSpec.Sample(sampLinear, input.TexCoord);
+        else
+            potentialSpecular = SpotLights[k].color * SpecMat;
+        
+        float3 halfwayDir = normalize(lightVector + viewerDir);
+        float specularIntensity = pow(max(dot(input.NormalW, halfwayDir), 0), specularPower);
+        specular += (potentialSpecular * specularIntensity) * attenuationFactor;
+    }
+    
     // Texturing
     
     // Modulate with late add. See verse Frank Luna 8.6 of the Bible to remind yourself what this means.
     // Account for having no texture available by multiplying by texture first and only using the texture
     // if it has one.
-    float4 totalColor = (ambient + diffuse);
+        float4 totalColor = (ambient + diffuse);
     
     if (hasAlbedoTexture)
     {
@@ -220,3 +270,5 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     return totalColor;
 }
+
+float4 Diffuse(float4 )

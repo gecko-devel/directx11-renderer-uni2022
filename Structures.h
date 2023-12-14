@@ -45,8 +45,21 @@ struct DirectionalLight
 struct PointLight
 {
 	XMFLOAT4 Color;
-	XMFLOAT3 Pos;
+	XMFLOAT3 Position;
 	FLOAT Attenuation;
+};
+
+
+struct SpotLight
+{
+public:
+	XMFLOAT4 Color;
+	XMFLOAT3 Direction;
+	FLOAT MaxAngle;
+	XMFLOAT3 Position;
+	FLOAT Attenuation;
+private:
+	XMFLOAT4 _padding;
 };
 
 struct Material
@@ -68,6 +81,8 @@ struct ConstantBuffer
 	XMMATRIX mView;
 	XMMATRIX mProjection;
 
+	SpotLight spotLights[20];
+
 	XMFLOAT4 ambientLight;
 
 	Fog fog;
@@ -80,10 +95,11 @@ struct ConstantBuffer
 	XMFLOAT4 SpecMat;
 
 	int hasAlbedoTextue = 0;
-	int hasNormalMapTextue = 0;
 	int hasSpecularMapTextue = 0;
 
 	float specularPower;
+
+	int numSpotLights;
 	
 	XMFLOAT3 EyePosW;
 

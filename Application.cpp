@@ -181,7 +181,7 @@ HRESULT Application::InitShadersAndInputLayout()
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -332,13 +332,31 @@ void Application::ParseConfig(std::string configPath)
         PointLight pointLight;
 
         pointLight.Color = plNode["color"].as<XMFLOAT4>();
-        pointLight.Pos = plNode["position"].as<XMFLOAT3>();
+        pointLight.Position = plNode["position"].as<XMFLOAT3>();
         pointLight.Attenuation = plNode["attenuation"].as<float>();
 
         _pointLights[i] = pointLight;
         i++;
     }
     _numPointLights = i;
+
+    // Read spotlights
+    i = 0;
+    for (YAML::Node slNode : _config["lighting"]["spotLights"])
+    {
+        SpotLight spotLight;
+
+        spotLight.Color = slNode["color"].as<XMFLOAT4>();
+        spotLight.Position = slNode["position"].as<XMFLOAT3>();
+        spotLight.Attenuation = slNode["attenuation"].as<float>();
+        spotLight.Direction = slNode["direction"].as<XMFLOAT3>();
+        spotLight.MaxAngle = slNode["maxAngle"].as<float>();
+
+        _spotLights[i] = spotLight;
+        i++;
+    }
+    _numSpotLights = i;
+
 }
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
@@ -621,18 +639,28 @@ void Application::Draw()
         ConstantBuffer cb;
         cb.mWorld = XMMatrixTranspose(world);
         cb.mView = XMMatrixTranspose(view);
+
         cb.mProjection = XMMatrixTranspose(projection);
+
         cb.ambientLight = _ambientLight;
+
+        cb.fog = _fog;
+
         std::copy(std::begin(_directionalLights), std::end(_directionalLights), std::begin(cb.directionalLights)); // copy pointlights to constant buffer
         std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.pointLights)); // copy pointlights to constant buffer
+        std::copy(std::begin(_spotLights), std::end(_spotLights), std::begin(cb.spotLights)); // copy spotlights to constant buffer
+
         cb.AmbMat = go->GetMaterial()->AmbientReflectivity;
         cb.DiffMat = go->GetMaterial()->DiffuseReflectivity;
         cb.SpecMat = go->GetMaterial()->SpecularReflectivity;
-        cb.EyePosW = _currentCamera->GetPosition();
+
         cb.specularPower = go->GetMaterial()->SpecularPower;
+
+        cb.EyePosW = _currentCamera->GetPosition();
+
         cb.numDirectionalLights = _numDirectionalLights;
         cb.numPointLights = _numPointLights;
-        cb.fog = _fog;
+        cb.numSpotLights = _numSpotLights;
         
         // Check for albedo texture
         if ((go->GetMaterial()->AlbedoTexture) != nullptr)
