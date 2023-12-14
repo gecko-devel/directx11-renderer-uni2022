@@ -21,7 +21,6 @@ cameras:
 materials:
   - name: "grass"
     albedoPath: "textures\\grass.dds"
-    normalMapPath: ""
     specularMapPath: ""
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
@@ -31,7 +30,6 @@ materials:
 
   - name: "water"
     albedoPath: ""
-    normalMapPath: ""
     specularMapPath: ""
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [0.11, 0.64, 0.93, 0.6]
@@ -41,7 +39,6 @@ materials:
 
   - name: "crate"
     albedoPath: "textures\\Crate_COLOR.dds"
-    normalMapPath: "textures\\Crate_NORM.dds"
     specularMapPath: "textures\\Crate_SPEC.dds"
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
@@ -51,7 +48,6 @@ materials:
 
   - name: "crate-transparent"
     albedoPath: "textures\\Crate_COLOR_TRANSLUCENT.dds"
-    normalMapPath: "textures\\Crate_NORM.dds"
     specularMapPath: "textures\\Crate_SPEC.dds"
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
@@ -61,7 +57,6 @@ materials:
 
   - name: "hand"
     albedoPath: "textures\\hand_albedo.dds"
-    normalMapPath: ""
     specularMapPath: ""
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]

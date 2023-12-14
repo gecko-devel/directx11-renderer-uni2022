@@ -262,15 +262,6 @@ void Application::ParseConfig(std::string configPath)
             material.AlbedoTexture = albedo;
         }
 
-        // Get normal map texture
-        std::string normalMapPath = matNode["normalMapPath"].as<std::string>();
-        if (normalMapPath != "")
-        {
-            ID3D11ShaderResourceView* normalMap;
-            CreateDDSTextureFromFile(_pd3dDevice, std::wstring(normalMapPath.begin(), normalMapPath.end()).c_str(), nullptr, &normalMap); // Read DDS image file and write data to stack
-            material.NormalMapTexture = normalMap;
-        }
-
         // Get specular map texture
         std::string specularMapPath = matNode["specularMapPath"].as<std::string>();
         if (specularMapPath != "")
@@ -655,23 +646,11 @@ void Application::Draw()
             cb.hasAlbedoTextue = 0;
         }
 
-        // Check for normal map texture
-        if ((go->GetMaterial()->NormalMapTexture) != nullptr)
-        {
-            // Set the textures to use
-            _pImmediateContext->PSSetShaderResources(1, 1, &go->GetMaterial()->NormalMapTexture); // Assign texture slot
-            cb.hasNormalMapTextue = 1;
-        }
-        else
-        {
-            cb.hasNormalMapTextue = 0;
-        }
-
         // Check for specular map texture
         if ((go->GetMaterial()->SpecularMapTexture) != nullptr)
         {
             // Set the textures to use
-            _pImmediateContext->PSSetShaderResources(2, 1, &go->GetMaterial()->SpecularMapTexture); // Assign texture slot
+            _pImmediateContext->PSSetShaderResources(1, 1, &go->GetMaterial()->SpecularMapTexture); // Assign texture slot
             cb.hasSpecularMapTextue = 1;
         }
         else

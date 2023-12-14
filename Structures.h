@@ -52,7 +52,6 @@ struct PointLight
 struct Material
 {
 	ID3D11ShaderResourceView* AlbedoTexture = nullptr;
-	ID3D11ShaderResourceView* NormalMapTexture = nullptr;
 	ID3D11ShaderResourceView* SpecularMapTexture = nullptr;
 
 	XMFLOAT4 AmbientReflectivity;

@@ -8,7 +8,7 @@
 // Shader vars
 //--------------------------------------------------------------------------------------
 Texture2D texDiffuse : register(t0);
-Texture2D texNorm : register(t1);
+Texture2D texSpec : register(t1);
 Texture2D texSpec : register(t2);
 
 SamplerState sampLinear : register(s0);
