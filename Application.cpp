@@ -78,6 +78,9 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Initialize the projection matrix
 	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
 
+    AmbientLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    AmbientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
 	return S_OK;
 }
 
@@ -127,7 +130,7 @@ HRESULT Application::InitShadersAndInputLayout()
     D3D11_INPUT_ELEMENT_DESC layout[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -153,15 +156,15 @@ HRESULT Application::InitVertexBuffer()
     // Create vertex buffer
     SimpleVertex vertices[] =
     {
-        { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT4( 0.0f, 0.0f, 1.0f, 1.0f ) }, //0
-        { XMFLOAT3( 1.0f, 1.0f, -1.0f ), XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ) },  //1
-        { XMFLOAT3( -1.0f, -1.0f, -1.0f ), XMFLOAT4( 0.0f, 1.0f, 1.0f, 1.0f ) },//2
-        { XMFLOAT3( 1.0f, -1.0f, -1.0f ), XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) }, //3
+        { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT3(-1.0f, 1.0f, -1.0f)  }, //0
+        { XMFLOAT3( 1.0f, 1.0f, -1.0f ) },  //1
+        { XMFLOAT3( -1.0f, -1.0f, -1.0f ) },//2
+        { XMFLOAT3( 1.0f, -1.0f, -1.0f ) }, //3
 
-        { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },      //4
-        { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },       //5
-        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },     //6
-        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },      //7
+        { XMFLOAT3(-1.0f, 1.0f, 1.0f) },      //4
+        { XMFLOAT3(1.0f, 1.0f, 1.0f) },       //5
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f) },     //6
+        { XMFLOAT3(1.0f, -1.0f, 1.0f) },      //7
     };
 
     D3D11_BUFFER_DESC bd;
@@ -183,12 +186,12 @@ HRESULT Application::InitVertexBuffer()
     // Create vertex buffer
     SimpleVertex pyramid_vertices[] =
     {
-        { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, //0
-        { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, //1
-        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, //2
-        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, //3
+        { XMFLOAT3(1.0f, -1.0f, -1.0f) }, //0
+        { XMFLOAT3(-1.0f, -1.0f, -1.0f) }, //1
+        { XMFLOAT3(1.0f, -1.0f, 1.0f) }, //2
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f) }, //3
 
-        { XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) }, // 4 - tip
+        { XMFLOAT3(0.0f, 1.0f, 0.0f) }, // 4 - tip
     };
 
     D3D11_BUFFER_DESC pyramidBd;
@@ -558,6 +561,8 @@ void Application::Draw()
 	cb.mView = XMMatrixTranspose(view);
 	cb.mProjection = XMMatrixTranspose(projection);
     cb.mT = _t;
+    cb.AmbLight = AmbientLight;
+    cb.AmbMat = AmbientMaterial;
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 

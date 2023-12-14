@@ -12,7 +12,7 @@ using namespace DirectX;
 struct SimpleVertex
 {
     XMFLOAT3 Pos;
-    XMFLOAT4 Color;
+    XMFLOAT3 Normal;
 };
 
 struct ConstantBuffer
@@ -21,6 +21,10 @@ struct ConstantBuffer
 	XMMATRIX mView;
 	XMMATRIX mProjection;
 	float mT;
+
+	//light vars
+	XMFLOAT4 AmbLight;
+	XMFLOAT4 AmbMat;
 };
 
 class Application
@@ -50,6 +54,10 @@ private:
 	ID3D11Texture2D* _depthStencilBuffer;
 
 	float _t;
+
+	// lighting vars
+	XMFLOAT4 AmbientLight;
+	XMFLOAT4 AmbientMaterial;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
