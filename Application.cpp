@@ -371,7 +371,7 @@ HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
 
     // Create window
     _hInst = hInstance;
-    RECT rc = {0, 0, 640, 480};
+    RECT rc = {0, 0, 1920, 1080};
     AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
     _hWnd = CreateWindow(L"TutorialWindowClass", L"DX11 Framework", WS_OVERLAPPEDWINDOW,
                          CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
@@ -606,7 +606,7 @@ void Application::Update()
     _currentCamera->Update();
 
     // Spin cube
-    _translucentGameObjects[0]->RotateOnAxes(XMFLOAT3(0.0, 10.0 * Time::GetDeltaTime(), 0.0));
+    //_translucentGameObjects[0]->RotateOnAxes(XMFLOAT3(0.0, 10.0 * Time::GetDeltaTime(), 0.0));
 
     // Update GameObjects
     for (GameObject* go : _orderedGameObjects)
