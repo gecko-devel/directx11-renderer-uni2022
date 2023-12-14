@@ -15,6 +15,26 @@ cameras:
     far: 100.0
 
 materials:
+  - name: "grass"
+    albedoPath: "textures\\grass.dds"
+    normalMapPath: ""
+    specularMapPath: ""
+    ambient: [1.0, 1.0, 1.0, 1.0]
+    diffuse: [1.0, 1.0, 1.0, 1.0]
+    specular: [0.0, 0.0, 0.0, 0.0]
+    specularPower: 100.0
+    isTranslucent: false
+
+  - name: "water"
+    albedoPath: ""
+    normalMapPath: ""
+    specularMapPath: ""
+    ambient: [1.0, 1.0, 1.0, 1.0]
+    diffuse: [0.11, 0.64, 0.93, 0.6]
+    specular: [1.0, 1.0, 1.0, 1.0]
+    specularPower: 3.0
+    isTranslucent: true
+
   - name: "crate"
     albedoPath: "textures\\Crate_COLOR.dds"
     normalMapPath: "textures\\Crate_NORM.dds"
@@ -38,7 +58,7 @@ materials:
   - name: "hand"
     albedoPath: "textures\\hand_albedo.dds"
     normalMapPath: ""
-    specularMapPath: "textures\\hand_spec.dds"
+    specularMapPath: ""
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
@@ -47,16 +67,34 @@ materials:
 
 gameObjects:
   - modelPath: "models\\cube.obj"
-    material: "crate-transparent"
+    material: "crate"
+    position: [3.0, 0.0, 0.0]
+    scale: [0.5, 0.5, 0.5]
+    rotation: [0.0, 0.0, 0.0]
+
+  - modelPath: "models\\badly_made_terrain.obj"
+    material: "grass"
     position: [3.0, 0.0, 0.0]
     scale: [1.0, 1.0, 1.0]
+    rotation: [0.0, 0.0, 0.0]
+
+  - modelPath: "models\\plane.obj"
+    material: "water"
+    position: [1.0, -0.05, 0.0]
+    scale: [6.0, 6.0, 6.0]
     rotation: [0.0, 0.0, 0.0]
     
   - modelPath: "models\\hand.obj"
     material: "hand"
-    position: [0.0, -1.0, -2.0]
-    scale: [2.0, 2.0, 2.0]
-    rotation: [0.0, 180.0, 0.0]
+    position: [-1.2, -0.5, -0.4]
+    scale: [5.0, 5.0, 5.0]
+    rotation: [0.0, 210.0, 0.0]
+
+  - modelPath: "models\\sphere.obj"
+    material: "water"
+    position: [4.0, 3.0, -4.0]
+    scale: [1.0, 1.0, 1.0]
+    rotation: [0.0, 0.0, 0.0]
 
 # Lighting
 lighting:
@@ -67,10 +105,10 @@ lighting:
       color: [0.7, 0.7, 0.7, 1.0]
 
   pointLights:
-    #- position: [0.0, 0.0, 0.0]
-    #  color: [0.0, 1.0, 0.0, 1.0]
-    #  attenuation: 0.3
+    - position: [4.0, 3.0, -4.0]
+      color: [0.0, 0.0, 1.0, 1.0]
+      attenuation: 0.1
 
-    - position: [0.0, 0.0, -5.5]
-      color: [1.0, 1.0, 1.0, 1.0]
-      attenuation: 0.3
+    #- position: [0.0, 0.0, -5.5]
+    #  color: [1.0, 1.0, 1.0, 1.0]
+    #  attenuation: 0.3
