@@ -12,36 +12,33 @@ Texture2D texSpec : register(t1);
 
 SamplerState sampLinear : register(s0);
 
-struct DirectionalLight
+struct Light
 {
     float4 Color;
-    float4 Direction;
-};
-
-struct PointLight
-{
-    float4 color;
-    float3 pos;
-    float attenuation;
-};
-
-struct SpotLight
-{
-    float4 color;
-    float3 direction;
-    float maxAngle;
-    float3 pos;
-    float attenuation;
-    float4 _padding;
+    // -------------- 16 bytes
+    float3 Direction;
+    int LightType;
+    // -------------- 16 bytes
+    // Below is used by point light and spot light
+    float3 Position;
+    float Attenuation;
+    // -------------- 16 bytes
+    // Below is ONLY used by spot light
+    float SpotAngle;
+    // Light type and padding
+    float3 _padding;
+    // -------------- 16 bytes
 };
 
 
 struct Fog
 {
-    float2 _padding;
+    float4 Color;
+    // -------------- 16 bytes
     float Start;
     float Range;
-    float4 Color;
+    float2 _padding;
+    // -------------- 16 bytes
 };
 
 //--------------------------------------------------------------------------------------
@@ -50,33 +47,72 @@ struct Fog
 cbuffer ConstantBuffer : register( b0 )
 {
 	matrix World;
+    // ----------- 64 bytes
 	matrix View;
+    // ----------- 64 bytes
 	matrix Projection;
-    
-    SpotLight SpotLights[20];
+    // ----------- 64 bytes
     
     float4 ambientLight;
+    // ----------- 16 bytes
     
     Fog fog;
+    // ----------- 32 bytes
     
-    DirectionalLight directionalLights[20];
-    PointLight PointLights[20];
+    Light lights[20];
+    // ----------- 1280 bytes
     
     float4 AmbMat;
-    float4 DiffMat;    
+    // ----------- 16 bytes
+    float4 DiffMat;
+    // ----------- 16 bytes
     float4 SpecMat;
+    // ----------- 16 bytes
     
-    bool hasAlbedoTexture;
-    bool hasSpecularMapTexture;
-    
-    float specularPower;
-    
-    int numSpotLights;
-
     float3 EyePosW;
     
-    int numPointLights;
-    int numDirectionalLights;
+    bool hasAlbedoTexture;
+    // ----------- 16 bytes
+    
+    bool hasSpecularMapTexture;
+    
+    int numLights;
+    
+    float SpecularPower;
+
+    float1 _padding;
+    // ----------- 16 bytes
+}
+
+// Functions
+
+float4 Diffuse(Light light, float3 directionToLight, float3 surfaceNormal)
+{
+    float4 potentialDiff = light.Color * DiffMat;
+    float diffPercent = max(dot(directionToLight, surfaceNormal), 0);
+    return potentialDiff * diffPercent;
+}
+
+// Blinn-Phong specular
+float4 Specular(Light light, float3 viewDirection, float3 directionToLight, float3 surfaceNormal, float2 texCoord)
+{
+    float4 potentialSpecular;
+    
+    if (hasSpecularMapTexture)
+        potentialSpecular = light.Color * texSpec.Sample(sampLinear, texCoord);
+    else
+        potentialSpecular = light.Color * SpecMat;
+    
+    
+    float3 halfwayVector = normalize(directionToLight + viewDirection);
+    float normalDotHalfway = max(0, dot(surfaceNormal, halfwayVector));
+    return potentialSpecular * pow(normalDotHalfway, SpecularPower);
+    
+}
+
+float Attenuation(Light light, float distance)
+{   
+    return 1.0f / (1.0f + pow(light.Attenuation * distance, 2.0f));
 }
 
 //--------------------------------------------------------------------------------------
@@ -118,8 +154,9 @@ VS_OUTPUT VS(float3 Pos : POSITION, float3 Normal : NORMAL, float2 texcoord : TE
 //--------------------------------------------------------------------------------------
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-    //float4 litColor;
-    float4 ambient = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    float4 litColor;
+    
+    float4 ambient = float4(1.0, 1.0, 1.0, 1.0);
     float4 diffuse = float4(0.0, 0.0, 0.0, 0.0);
     float4 specular = float4(0.0, 0.0, 0.0, 0.0);
     
@@ -149,126 +186,83 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // PointLights
     // ----------------
     
-    // DirectionalLights
-    for (int i = 0; i < numDirectionalLights; i++)
+    // Lights
+    for (int i = 0; i < numLights; i++)
     {
-        // Diffuse
-        float4 potentialDiff = directionalLights[i].Color * DiffMat;
-        float difPercent = max(dot(normalize(directionalLights[i].Direction), normalize(input.NormalW)), 0);
-        float DiffuseAmount = difPercent * potentialDiff;
-        diffuse += DiffuseAmount * (DiffMat * directionalLights[i].Color);
-    
-        // Specular
-        float4 potentialSpecular;
-    
-        if (hasSpecularMapTexture)
-            potentialSpecular = directionalLights[i].Color * texSpec.Sample(sampLinear, input.TexCoord);
-        else
-            potentialSpecular = directionalLights[i].Color * SpecMat;
+        switch (lights[i].LightType)
+        {
+            case 0: // Directional Light
+                {
+                    float3 directionToLight = -lights[i].Direction;
         
-        // Blinn-Phong
-        float3 halfwayDir = normalize(directionalLights[i].Direction + viewerDir);
-        float specularIntensity = pow(max(dot(input.NormalW, halfwayDir), 0), specularPower);
-        specular += (potentialSpecular * specularIntensity);
+                    diffuse += Diffuse(lights[i], directionToLight, input.NormalW);
+                    specular += Specular(lights[i], viewerDir, directionToLight, input.NormalW, input.TexCoord);    
+                }
+                break;
+            
+            case 1: // Point Light
+                {
+                    float3 lightVector = normalize(lights[i].Position - input.PosW);
+                    float distanceToLight = length(lightVector);
+                    lightVector = lightVector / distanceToLight;
+            
+                    float attenuation = Attenuation(lights[i], distanceToLight);
+                
+                    diffuse += Diffuse(lights[i], lightVector, input.NormalW) * attenuation;
+                    specular += Specular(lights[i], viewerDir, lightVector, input.NormalW, input.TexCoord) * attenuation;
+                }
+                break;
+            
+            case 2: // Spot Light
+                {
+                    // Get direction of the light to the current pixel's world position
+                    float3 lightVector = lights[i].Position - input.PosW;
+                    float distanceToLight = length(lightVector);
+        
+                    // Falloff as light vector gets close to maximum angle to normal
+                    // Most code is derived (not directly copied) from here: https://www.3dgep.com/texturing-lighting-directx-11/#Spotlight_Cone
+                    float minCos = cos(lights[i].SpotAngle);
+                    float maxCos = (minCos + 1.0f) / 2.0f;
+                    float cosAngle = dot(lights[i].Direction, -lightVector);
+                    float spotIntensity = smoothstep(minCos, maxCos, cosAngle);
+                
+                    float attenuation = Attenuation(lights[i], distanceToLight);
+                
+                    diffuse += Diffuse(lights[i], lightVector, input.NormalW) * attenuation * spotIntensity;
+                    specular += Specular(lights[i], viewerDir, lightVector, input.NormalW, input.TexCoord) * attenuation * spotIntensity;
+                }
+                break;
+        }
     }
-    
-    // PointLights
-    for (int j = 0; j < numPointLights; j++)
-    {
-        float3 directionToPointLight = normalize(PointLights[j].pos - input.PosW);
-        float distanceToPointLight = length(PointLights[j].pos - input.PosW);
-
-        float pointLightIntensity = 1.0f / (1.0f + pow(PointLights[j].attenuation * distanceToPointLight, 2.0f));
-       
-    
-        // Diffuse
-        float4 potentialDiff = PointLights[j].color * DiffMat;
-        float difPercent = max(dot(normalize(directionToPointLight), normalize(input.NormalW)), 0);
-        float DiffuseAmount = difPercent * potentialDiff;
-        diffuse += (DiffuseAmount * (DiffMat * PointLights[j].color)) * pointLightIntensity;
-    
-        // Specular
-        float4 potentialSpecular;
-        
-        if (hasSpecularMapTexture)
-            potentialSpecular = PointLights[j].color * texSpec.Sample(sampLinear, input.TexCoord);
-        else
-            potentialSpecular = PointLights[j].color * SpecMat;
-        
-        float3 halfwayDir = normalize(directionToPointLight + viewerDir);
-        float specularIntensity = pow(max(dot(input.NormalW, halfwayDir), 0), specularPower);
-        specular += (potentialSpecular * specularIntensity) * pointLightIntensity;
-    }
-    
-    // Spotlights
-    for (int k = 0; k < numSpotLights; k++)
-    {
-        // Get direction of the light to the current pixel's world position
-        float3 lightVector = normalize(SpotLights[k].pos - input.PosW);
-        
-        // Falloff as light vector gets close to maximum angle to normal
-        // Most code is derived (not directly copied) from here: https://www.3dgep.com/texturing-lighting-directx-11/#Spotlight_Cone
-        float minCos = cos(SpotLights[k].maxAngle);
-        float maxCos = (minCos + 1.0f) / 2.0f;
-        float cosAngle = dot(SpotLights[k].direction, -lightVector);
-        float spotIntensity = smoothstep(minCos, maxCos, cosAngle);
-        
-        // Calculate attenuation
-        
-        float distanceToSpotLight = length(SpotLights[k].pos - input.PosW);
-
-        float attenuationFactor = 1.0f / (1.0f + pow(SpotLights[k].attenuation * lightVector, 2.0f));
-        
-        // Diffuse
-        float4 potentialDiff = SpotLights[k].color * DiffMat;
-        float difPercent = max(dot(normalize(lightVector), normalize(input.NormalW)), 0);
-        float DiffuseAmount = difPercent * potentialDiff;
-        diffuse += (DiffuseAmount * (DiffMat * SpotLights[k].color)) * attenuationFactor * spotIntensity;
-        
-        // Specular
-        float4 potentialSpecular;
-        
-        if (hasSpecularMapTexture)
-            potentialSpecular = SpotLights[k].color * texSpec.Sample(sampLinear, input.TexCoord);
-        else
-            potentialSpecular = SpotLights[k].color * SpecMat;
-        
-        float3 halfwayDir = normalize(lightVector + viewerDir);
-        float specularIntensity = pow(max(dot(input.NormalW, halfwayDir), 0), specularPower);
-        specular += (potentialSpecular * specularIntensity) * attenuationFactor;
-    }
-    
-    // Texturing
     
     // Modulate with late add. See verse Frank Luna 8.6 of the Bible to remind yourself what this means.
+    litColor = ambient + diffuse;
+    
+    // Texturing
     // Account for having no texture available by multiplying by texture first and only using the texture
     // if it has one.
-        float4 totalColor = (ambient + diffuse);
-    
     if (hasAlbedoTexture)
     {
         float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
-        totalColor *= textureColor;
+        litColor *= textureColor;
         
         // Translucency
-        totalColor.a = textureColor.a * DiffMat.a;
+        litColor.a = textureColor.a * DiffMat.a;
 
     }
     else
     {
         // Translucency
-        totalColor.a = DiffMat.a;
+        litColor.a = DiffMat.a;
     }
 
-    totalColor.rgb += specular.rgb;
+    litColor.rgb += specular.rgb;
     
     // The fog is coming
     float distanceToCamera = distance(input.PosW, EyePosW);
     float fogLerp = saturate((distanceToCamera - fog.Start) / fog.Range);
     
-    totalColor = lerp(totalColor, fog.Color, fogLerp);
+    litColor = lerp(litColor, fog.Color, fogLerp);
     
-    return totalColor;
+    return litColor;
 }
-
-float4 Diffuse(float4 )
