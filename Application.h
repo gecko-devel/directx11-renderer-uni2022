@@ -37,6 +37,7 @@ private:
 	ID3D11Texture2D* _depthStencilBuffer;
 
 	float _t;
+	float _deltaTime;
 
 	// Make Camera
 	Camera* _currentCamera;
@@ -61,7 +62,9 @@ private:
 	MeshData _yippeeMeshData;
 
 	// Input vector
-	XMFLOAT2 _input;
+	XMFLOAT3 _input;
+
+	FLOAT _cameraSpeed;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);

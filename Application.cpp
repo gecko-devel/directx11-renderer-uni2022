@@ -39,6 +39,8 @@ Application::Application()
 	_pCubeVertexBuffer = nullptr;
 	_pCubeIndexBuffer = nullptr;
 	_pConstantBuffer = nullptr;
+
+    _cameraSpeed = 30.0f;
 }
 
 Application::~Application()
@@ -503,9 +505,9 @@ void Application::Cleanup()
 
 void Application::Update()
 {
-    // Update our time
-    //static float t = 0.0f;
+    float previousT = _t;
 
+    // Update our time
     if (_driverType == D3D_DRIVER_TYPE_REFERENCE)
     {
         _t += (float) XM_PI * 0.0125f;
@@ -520,6 +522,8 @@ void Application::Update()
 
         _t = (dwTimeCur - dwTimeStart) / 1000.0f;
     }
+
+    _deltaTime = _t - previousT;
 
     // If K is pressed, go to wireframe render state.
     if (GetAsyncKeyState(0x4B))
@@ -537,18 +541,22 @@ void Application::Update()
     if (GetAsyncKeyState(0x32))
         _currentCamera = _cameras.at(1);
 
-    // Get input vector from WASD
-    _input = XMFLOAT2((int)GetAsyncKeyState(0x41) - (int)GetAsyncKeyState(0x44), (int)GetAsyncKeyState(0x53) - (int)GetAsyncKeyState(0x57));
+    // Get input vector from WASD + QE for up/down
+    _input = XMFLOAT3((int)GetAsyncKeyState(0x41) - (int)GetAsyncKeyState(0x44), (int)GetAsyncKeyState(0x51) - (int)GetAsyncKeyState(0x45), (int)GetAsyncKeyState(0x53) - (int)GetAsyncKeyState(0x57));
+    //                                      A                               D                            Q                            E                             W                             S
 
     // Animate the world
     XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t));
 
-    // Animate the cameras
-    XMFLOAT3 cam0Pos = _cameras.at(0)->GetPosition();
-    _cameras.at(0)->SetPosition(XMFLOAT3(cam0Pos.x, -30.0f * sin(_t), cam0Pos.z));
+    // Move the Free camera
+    XMFLOAT3 freeCamPos = _cameras.at(0)->GetPosition();
+    XMFLOAT3 freeCamVelocity;
+    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * (_cameraSpeed * _deltaTime));
+    _cameras.at(0)->SetPosition(XMFLOAT3(freeCamPos.x + freeCamVelocity.x, freeCamPos.y + freeCamVelocity.y, freeCamPos.z + freeCamVelocity.z));
 
-    XMFLOAT3 cam1Pos = _cameras.at(1)->GetPosition();
-    _cameras.at(1)->SetPosition(XMFLOAT3(-30.0f * sin(_t), cam1Pos.y, cam0Pos.z));
+    // Move the Orbit camera
+    XMFLOAT3 orbitCamPos = _cameras.at(1)->GetPosition();
+    _cameras.at(1)->SetPosition(XMFLOAT3(-30.0f * sin(_t), orbitCamPos.y, orbitCamPos.z));
 
     // Update the camera
     _currentCamera->Update();
