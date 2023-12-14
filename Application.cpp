@@ -68,15 +68,14 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	// Initialize the world matrix
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
 
-    // Initialize the view matrix
-	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -30.0f, 0.0f);
-	XMVECTOR At = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    // Make camera
+    XMFLOAT3 cameraPos = XMFLOAT3(0.0f, 0.0f, -30.0f);
+    XMFLOAT3 cameraAt = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    XMFLOAT3 cameraUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
+    FLOAT cameraNear = 0.01f;
+    FLOAT cameraFar = 100.0f;
 
-	XMStoreFloat4x4(&_view, XMMatrixLookAtLH(Eye, At, Up));
-
-    // Initialize the projection matrix
-	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
+    _camera = new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar);
 
     // Make Global Light
     globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
@@ -89,20 +88,19 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     PointLight pointLight1;
     pointLight1.Pos = XMFLOAT3(-30.0f, 0.0f, -30.0f);
     pointLight1.Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-    pointLight1.Attenuation = 1.0f;
+    pointLight1.Attenuation = 0.01f;
     PointLights[0] = pointLight1;
 
     PointLight pointLight2;
     pointLight2.Pos = XMFLOAT3(15.0f, 0.0f, 0.0f);
     pointLight2.Color = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-    pointLight2.Attenuation = 0.1f;
+    pointLight2.Attenuation = 0.01f;
     PointLights[1] = pointLight2;
 
+    // Define materials for the lights. Remove this later when encapsulated.
     AmbientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     DiffuseMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     SpecularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-    XMStoreFloat3(&EyeWorldPos, Eye);
 
     // Texture initialisation
     CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pColorTextureRV);
@@ -534,7 +532,7 @@ void Application::Update()
     //
     // Animate the YIPPEE
     //
-    XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationX(_t));
+    XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t));
 }
 
 void Application::Draw()
@@ -549,8 +547,8 @@ void Application::Draw()
 
     // Set the world, view, and projection matrices
 	XMMATRIX world = XMLoadFloat4x4(&_world);
-	XMMATRIX view = XMLoadFloat4x4(&_view);
-	XMMATRIX projection = XMLoadFloat4x4(&_projection);
+	XMMATRIX view = XMLoadFloat4x4(&_camera->GetView());
+	XMMATRIX projection = XMLoadFloat4x4(&_camera->GetProjection());
 
     //
     // Update variables
@@ -564,9 +562,9 @@ void Application::Draw()
     cb.AmbMat = AmbientMaterial;
     cb.DiffMat = DiffuseMaterial;
     cb.SpecMat = SpecularMaterial;
-    cb.EyePosW = EyeWorldPos;
+    cb.EyePosW = _camera->GetPosition();
     cb.mT = _t;
-    cb.numPointLights = 0;
+    cb.numPointLights = 2;
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 

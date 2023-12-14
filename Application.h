@@ -8,6 +8,7 @@
 #include "DDSTextureLoader.h"
 #include "OBJLoader.h"
 #include "Structures.h"
+#include "Camera.h"
 
 using namespace DirectX;
 
@@ -29,8 +30,6 @@ private:
 	ID3D11Buffer*           _pCubeIndexBuffer;
 	ID3D11Buffer*           _pConstantBuffer;
 	XMFLOAT4X4              _world, _world2, _world3;
-	XMFLOAT4X4              _view;
-	XMFLOAT4X4              _projection;
 
 	ID3D11RasterizerState* _wireframe;
 
@@ -39,6 +38,9 @@ private:
 
 	float _t;
 
+	// Make Camera
+	Camera* _camera;
+
 	// lighting vars
 	GlobalLight globalLight;
 	PointLight PointLights[20];
@@ -46,8 +48,6 @@ private:
 	XMFLOAT4 AmbientMaterial;
 	XMFLOAT4 DiffuseMaterial;
 	XMFLOAT4 SpecularMaterial;
-
-	XMFLOAT3 EyeWorldPos;
 
 	// Texture vars
 	ID3D11ShaderResourceView* _pColorTextureRV = nullptr;
