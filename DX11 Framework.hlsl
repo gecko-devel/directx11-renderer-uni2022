@@ -26,6 +26,14 @@ struct PointLight
     float attenuation;
 };
 
+struct Fog
+{
+    float2 padding;
+    float Start;
+    float Range;
+    float4 Color;
+};
+
 //--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
@@ -37,8 +45,11 @@ cbuffer ConstantBuffer : register( b0 )
     
     float4 ambientLight;
     
+    Fog fog;
+    
     DirectionalLight directionalLights[20];
     PointLight PointLights[20];
+    
     
     float4 AmbMat;
     float4 DiffMat;    
@@ -150,27 +161,27 @@ float4 PS(VS_OUTPUT input) : SV_Target
     }
     
     // PointLights
-    for (int i = 0; i < numPointLights; i++)
+    for (int j = 0; j < numPointLights; j++)
     {
-        float3 directionToPointLight = normalize(PointLights[i].pos - input.PosW);
-        float distanceToPointLight = length(PointLights[i].pos - input.PosW);
+        float3 directionToPointLight = normalize(PointLights[j].pos - input.PosW);
+        float distanceToPointLight = length(PointLights[j].pos - input.PosW);
 
-        float pointLightIntensity = 1.0f / (1.0f + pow(PointLights[i].attenuation * distanceToPointLight, 2.0f));
+        float pointLightIntensity = 1.0f / (1.0f + pow(PointLights[j].attenuation * distanceToPointLight, 2.0f));
        
     
         // Diffuse
-        float4 potentialDiff = PointLights[i].color * DiffMat;
+        float4 potentialDiff = PointLights[j].color * DiffMat;
         float difPercent = max(dot(normalize(directionToPointLight), normalize(input.NormalW)), 0);
         float DiffuseAmount = difPercent * potentialDiff;
-        diffuse += (DiffuseAmount * (DiffMat * PointLights[i].color)) * pointLightIntensity;
+        diffuse += (DiffuseAmount * (DiffMat * PointLights[j].color)) * pointLightIntensity;
     
         // Specular
         float4 potentialSpecular;
         
         if (hasSpecularMapTexture)
-            potentialSpecular = PointLights[i].color * texSpec.Sample(sampLinear, input.TexCoord);
+            potentialSpecular = PointLights[j].color * texSpec.Sample(sampLinear, input.TexCoord);
         else
-            potentialSpecular = PointLights[i].color * SpecMat;
+            potentialSpecular = PointLights[j].color * SpecMat;
         
         float3 halfwayDir = normalize(directionToPointLight + viewerDir);
         float specularIntensity = pow(max(dot(input.NormalW, halfwayDir), 0), specularPower);
@@ -183,6 +194,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // Account for having no texture available by multiplying by texture first and only using the texture
     // if it has one.
     float4 totalColor = (ambient + diffuse);
+    
     if (hasAlbedoTexture)
     {
         float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
@@ -199,6 +211,12 @@ float4 PS(VS_OUTPUT input) : SV_Target
     }
 
     totalColor.rgb += specular.rgb;
+    
+    // The fog is coming
+    float distanceToCamera = distance(input.PosW, EyePosW);
+    float fogLerp = saturate((distanceToCamera - fog.Start) / fog.Range);
+    
+    totalColor = lerp(totalColor, fog.Color, fogLerp);
     
     return totalColor;
 }

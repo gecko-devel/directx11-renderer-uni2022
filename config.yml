@@ -1,3 +1,8 @@
+fog:
+  start: 10
+  range: 20
+  color: [0.0, 0.125, 0.3, 1.0]
+
 cameras:
   - type: "free"
     position: [0.0, 2.0, -10.0]
@@ -21,7 +26,7 @@ materials:
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [0.0, 0.0, 0.0, 1.0]
-    specularPower: 1000.0
+    specularPower: 10.0
     isTranslucent: false
 
   - name: "water"
@@ -31,7 +36,7 @@ materials:
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [0.11, 0.64, 0.93, 0.6]
     specular: [1.0, 1.0, 1.0, 1.0]
-    specularPower: 3.0
+    specularPower: 5.0
     isTranslucent: true
 
   - name: "crate"
@@ -41,7 +46,7 @@ materials:
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
-    specularPower: 3.0
+    specularPower: 5.0
     isTranslucent: false
 
   - name: "crate-transparent"
@@ -51,7 +56,7 @@ materials:
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
-    specularPower: 3.0
+    specularPower: 5.0
     isTranslucent: true
 
   - name: "hand"
@@ -61,7 +66,7 @@ materials:
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
-    specularPower: 3.0
+    specularPower: 5.0
     isTranslucent: false
 
 gameObjects:
@@ -69,12 +74,6 @@ gameObjects:
     material: "crate"
     position: [3.0, 0.0, 0.0]
     scale: [0.5, 0.5, 0.5]
-    rotation: [0.0, 0.0, 0.0]
-
-  - modelPath: "models\\badly_made_terrain.obj"
-    material: "grass"
-    position: [3.0, 0.0, 0.0]
-    scale: [1.0, 1.0, 1.0]
     rotation: [0.0, 0.0, 0.0]
 
   - modelPath: "models\\plane.obj"
@@ -95,7 +94,12 @@ gameObjects:
     scale: [1.0, 1.0, 1.0]
     rotation: [0.0, 0.0, 0.0]
 
-# Lighting
+  - modelPath: "models\\badly_made_terrain.obj"
+    material: "grass"
+    position: [3.0, 0.0, 0.0]
+    scale: [1.0, 1.0, 1.0]
+    rotation: [0.0, 0.0, 0.0]
+
 lighting:
   ambientLight: [0.2, 0.2, 0.2, 1]
 
@@ -107,7 +111,3 @@ lighting:
     - position: [4.0, 3.0, -4.0]
       color: [0.0, 0.0, 1.0, 1.0]
       attenuation: 0.1
-
-    #- position: [0.0, 0.0, 1.0]
-    #  color: [1.0, 1.0, 1.0, 1.0]
-    #  attenuation: 0.1

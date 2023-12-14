@@ -17,6 +17,15 @@ struct SimpleVertex
 	};
 };
 
+struct Fog
+{
+private:
+	XMFLOAT2 padding;
+public:
+	float Start;
+	float Range;
+	XMFLOAT4 Color;
+};
 
 struct MeshData
 {
@@ -61,6 +70,8 @@ struct ConstantBuffer
 	XMMATRIX mProjection;
 
 	XMFLOAT4 ambientLight;
+
+	Fog fog;
 
 	DirectionalLight directionalLights[20];
 	PointLight pointLights[20];

@@ -204,6 +204,11 @@ void Application::ParseConfig(std::string configPath)
 {
     _config = YAML::LoadFile(configPath);
 
+    // Read fog settings
+    _fog.Start = _config["fog"]["start"].as<float>();
+    _fog.Range = _config["fog"]["range"].as<float>();
+    _fog.Color = _config["fog"]["color"].as<XMFLOAT4>();
+
     // Read cameras
     Camera* cam = nullptr;
 
@@ -562,11 +567,8 @@ void Application::Update()
 
     // Sort GameObjects into order of distance to camera and tranclucency:
 
-    // OK, pause. I know you're wondering why there are is a lambda here.
+    // OK, pause. I know you're wondering why there is a lambda here.
     // Don't worry about it. It's all okay. Everything is fine.
-    // 
-    // (functors scared me)
-   
     std::sort(_translucentGameObjects.begin(),
         _translucentGameObjects.end(),
         [this](GameObject* lhs, GameObject* rhs)
@@ -639,6 +641,7 @@ void Application::Draw()
         cb.specularPower = go->GetMaterial()->SpecularPower;
         cb.numDirectionalLights = _numDirectionalLights;
         cb.numPointLights = _numPointLights;
+        cb.fog = _fog;
         
         // Check for albedo texture
         if ((go->GetMaterial()->AlbedoTexture) != nullptr)

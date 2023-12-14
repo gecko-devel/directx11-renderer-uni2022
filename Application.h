@@ -58,6 +58,8 @@ private:
 
 	ID3D11BlendState* _pTransparentBlendState = nullptr;
 
+	Fog _fog;
+
 	// Config file
 	YAML::Node _config;
 
