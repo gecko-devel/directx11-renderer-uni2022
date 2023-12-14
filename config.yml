@@ -20,8 +20,8 @@ materials:
     specularMapPath: ""
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
-    specular: [0.0, 0.0, 0.0, 0.0]
-    specularPower: 100.0
+    specular: [0.0, 0.0, 0.0, 1.0]
+    specularPower: 1000.0
     isTranslucent: false
 
   - name: "water"
@@ -108,6 +108,6 @@ lighting:
       color: [0.0, 0.0, 1.0, 1.0]
       attenuation: 0.1
 
-    #- position: [0.0, 0.0, -5.5]
+    #- position: [0.0, 0.0, 1.0]
     #  color: [1.0, 1.0, 1.0, 1.0]
-    #  attenuation: 0.3
+    #  attenuation: 0.1

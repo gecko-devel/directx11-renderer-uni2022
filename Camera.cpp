@@ -47,9 +47,6 @@ void Camera::RotateEulerAngles(XMFLOAT3 rotationAxes)
 	XMStoreFloat3(&_right, XMVector3Normalize(XMLoadFloat3(&_right)));
 	XMStoreFloat3(&_up, XMVector3Normalize(XMLoadFloat3(&_up)));
 	XMStoreFloat3(&_forward, XMVector3Normalize(XMLoadFloat3(&_forward)));
-
-
-	XMStoreFloat4x4(&_view, XMMatrixLookToLH(XMLoadFloat3(&_pos), XMLoadFloat3(&_forward), XMLoadFloat3(&_up)));
 }
 
 void Camera::Move(XMFLOAT3 velocity)

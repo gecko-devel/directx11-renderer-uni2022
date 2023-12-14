@@ -141,11 +141,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
         if (hasSpecularMapTexture)
             potentialSpecular = directionalLights[i].Color * texSpec.Sample(sampLinear, input.TexCoord);
         else
-            potentialSpecular = directionalLights[i].Color;
+            potentialSpecular = directionalLights[i].Color * SpecMat;
         
-        float3 reflectDir = reflect(-directionalLights[i].Direction, normalize(input.NormalW));
-        reflectDir = normalize(reflectDir);
-        float specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), specularPower);
+        // Blinn-phon
+        float3 halfwayDir = normalize(directionalLights[i].Direction + viewerDir);
+        float specularIntensity = pow(max(dot(input.NormalW, halfwayDir), 0), specularPower);
         specular += (potentialSpecular * specularIntensity);
     }
     
@@ -170,10 +170,10 @@ float4 PS(VS_OUTPUT input) : SV_Target
         if (hasSpecularMapTexture)
             potentialSpecular = PointLights[i].color * texSpec.Sample(sampLinear, input.TexCoord);
         else
-            potentialSpecular = PointLights[i].color;
+            potentialSpecular = PointLights[i].color * SpecMat;
         
-        float3 reflectDir = normalize(reflect(-directionToPointLight, normalize(input.NormalW)));
-        float specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), specularPower);
+        float3 halfwayDir = normalize(directionToPointLight + viewerDir);
+        float specularIntensity = pow(max(dot(input.NormalW, halfwayDir), 0), specularPower);
         specular += (potentialSpecular * specularIntensity) * pointLightIntensity;
     }
     
