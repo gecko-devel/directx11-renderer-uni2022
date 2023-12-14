@@ -78,7 +78,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Initialize the projection matrix
 	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
 
-    AmbientLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    AmbientLight = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.2f);
     AmbientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	return S_OK;
@@ -572,6 +572,9 @@ void Application::Draw()
     _pImmediateContext->IASetVertexBuffers(0, 1, &_pPyramidVertexBuffer, &stride, &offset);
     _pImmediateContext->IASetIndexBuffer(_pPyramidIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
+
+    cb.AmbMat = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
     //
     // Renders a triangle
     //
@@ -584,10 +587,15 @@ void Application::Draw()
     _pImmediateContext->IASetVertexBuffers(0, 1, &_pCubeVertexBuffer, &stride, &offset);
     _pImmediateContext->IASetIndexBuffer(_pCubeIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
+    cb.AmbMat = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
+
     world = XMLoadFloat4x4(&_world2);
     cb.mWorld = XMMatrixTranspose(world);
     _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
     _pImmediateContext->DrawIndexed(36, 0, 0);
+
+
+    cb.AmbMat = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
 
     world = XMLoadFloat4x4(&_world3);
     cb.mWorld = XMMatrixTranspose(world);

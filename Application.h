@@ -20,11 +20,11 @@ struct ConstantBuffer
 	XMMATRIX mWorld;
 	XMMATRIX mView;
 	XMMATRIX mProjection;
-	float mT;
 
-	//light vars
+
 	XMFLOAT4 AmbLight;
-	XMFLOAT4 AmbMat;
+	XMFLOAT4 AmbMat;	
+	float mT;
 };
 
 class Application

@@ -12,10 +12,10 @@ cbuffer ConstantBuffer : register( b0 )
 	matrix World;
 	matrix View;
 	matrix Projection;
-    float T;
-
+    
     float4 AmbLight;
     float4 AmbMat;
+    float T;
 }
 
 //--------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ VS_OUTPUT VS( float3 Pos : POSITION, float3 Normal : NORMAL, float3 PosW : POSIT
 //--------------------------------------------------------------------------------------
 // Pixel Shader
 //--------------------------------------------------------------------------------------
-float4 PS( VS_OUTPUT input ) : SV_Target
+float4 PS(VS_OUTPUT input) : SV_Target
 {
-    return input.Color * input.PosW.y * sin(T);
+    return input.Color; //* input.PosW.y * sin(T);
 }
