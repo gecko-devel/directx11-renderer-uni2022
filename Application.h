@@ -20,6 +20,7 @@ struct ConstantBuffer
 	XMMATRIX mWorld;
 	XMMATRIX mView;
 	XMMATRIX mProjection;
+	float mT;
 };
 
 class Application
@@ -47,6 +48,8 @@ private:
 
 	ID3D11DepthStencilView* _depthStencilView;
 	ID3D11Texture2D* _depthStencilBuffer;
+
+	float _t;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);

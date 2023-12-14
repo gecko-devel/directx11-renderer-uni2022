@@ -448,7 +448,11 @@ HRESULT Application::InitDevice()
     vp.TopLeftY = 0;
     _pImmediateContext->RSSetViewports(1, &vp);
 
-	InitShadersAndInputLayout();
+	hr = InitShadersAndInputLayout();
+    if (FAILED(hr))
+    {
+        return S_FALSE;
+    }
 
 	InitVertexBuffer();
 
@@ -502,11 +506,11 @@ void Application::Cleanup()
 void Application::Update()
 {
     // Update our time
-    static float t = 0.0f;
+    //static float t = 0.0f;
 
     if (_driverType == D3D_DRIVER_TYPE_REFERENCE)
     {
-        t += (float) XM_PI * 0.0125f;
+        _t += (float) XM_PI * 0.0125f;
     }
     else
     {
@@ -516,21 +520,22 @@ void Application::Update()
         if (dwTimeStart == 0)
             dwTimeStart = dwTimeCur;
 
-        t = (dwTimeCur - dwTimeStart) / 1000.0f;
+        _t = (dwTimeCur - dwTimeStart) / 1000.0f;
     }
 
     //
     // Animate the cube
     //
-	XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(t) * XMMatrixRotationZ(t));
+	XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t) * XMMatrixRotationZ(_t));
 
-    XMStoreFloat4x4(&_world2, XMMatrixScaling(0.2f, 0.2f, 0.2f) * XMMatrixRotationZ(t / 2) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(t / 2));
+    XMStoreFloat4x4(&_world2, XMMatrixScaling(0.2f, 0.2f, 0.2f) * XMMatrixRotationZ(_t / 2) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(_t / 2));
 
-    XMStoreFloat4x4(&_world3, XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationZ(t * 2) * XMMatrixTranslation(0.6f, 0.0f, 0.0f) * XMMatrixRotationY(-t * 3) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(t / 2));
+    XMStoreFloat4x4(&_world3, XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationZ(_t * 2) * XMMatrixTranslation(0.6f, 0.0f, 0.0f) * XMMatrixRotationY(-_t * 3) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(_t / 2));
 }
 
 void Application::Draw()
 {
+
     //
     // Clear the back buffer
     //
@@ -549,6 +554,7 @@ void Application::Draw()
 	cb.mWorld = XMMatrixTranspose(world);
 	cb.mView = XMMatrixTranspose(view);
 	cb.mProjection = XMMatrixTranspose(projection);
+    cb.mT = _t;
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
