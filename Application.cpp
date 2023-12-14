@@ -41,6 +41,8 @@ Application::Application()
 	_pConstantBuffer = nullptr;
 
     _cameraSpeed = 30.0f;
+
+    config = YAML::LoadFile("config.yml");
 }
 
 Application::~Application()
@@ -77,7 +79,11 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     FLOAT cameraNear = 0.01f;
     FLOAT cameraFar = 100.0f;
 
-    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::To));
+
+    // Load config values into first camera
+    XMFLOAT3 yamlCameraPos = config["debug-camera"]["position"].as<XMFLOAT3>();
+    _cameras.push_back(new Camera(yamlCameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::To));
+    // Use values above for second camera
     _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::At));
     _currentCamera = _cameras.at(0);
 
@@ -551,7 +557,7 @@ void Application::Update()
     // Move the Free camera
     XMFLOAT3 freeCamPos = _cameras.at(0)->GetPosition();
     XMFLOAT3 freeCamVelocity;
-    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * (_cameraSpeed * _deltaTime));
+    XMStoreFloat3(&freeCamVelocity, XMVector3Normalize(XMLoadFloat3(&_input)) * (config["debug-camera"]["speed"].as<float>() * _deltaTime));
     _cameras.at(0)->SetPosition(XMFLOAT3(freeCamPos.x + freeCamVelocity.x, freeCamPos.y + freeCamVelocity.y, freeCamPos.z + freeCamVelocity.z));
 
     // Move the Orbit camera

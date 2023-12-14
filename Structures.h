@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <DirectXMath.h>
+#include <yaml-cpp/yaml.h>
 
 using namespace DirectX;
 
@@ -60,3 +61,34 @@ struct ConstantBuffer
 	float mT;
 	int numPointLights;
 };
+
+// Conversion function for YAML to XMFLOAT3, yoinked and edited from here:
+// https://github.com/jbeder/yaml-cpp/wiki/Tutorial#converting-tofrom-native-data-types
+namespace YAML
+{
+	template<>
+	struct convert<XMFLOAT3>
+	{
+		static Node encode(const XMFLOAT3& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.push_back(rhs.z);
+			return node;
+		}
+
+		static bool decode(const Node& node, XMFLOAT3& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 3)
+			{
+				return false;
+			}
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			rhs.z = node[2].as<float>();
+			return true;
+		}
+	};
+}

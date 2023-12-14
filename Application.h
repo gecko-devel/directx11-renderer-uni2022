@@ -68,6 +68,9 @@ private:
 
 	FLOAT _cameraSpeed;
 
+	// Config file
+	YAML::Node config;
+
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
