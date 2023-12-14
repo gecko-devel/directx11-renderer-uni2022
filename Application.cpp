@@ -1,5 +1,4 @@
 #include "Application.h"
-#include "include/yaml-cpp/yaml.h"
 
 //using namespace YAML;
 
@@ -73,22 +72,14 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	// Initialize the world matrix
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
 
-    // Load the config values and create gameobjects
-    LoadConfig("config.yml");
-
-    // Make cameras
-    XMFLOAT3 cameraPos = XMFLOAT3(0.0f, 0.0f, -30.0f);
-    XMFLOAT3 cameraAt = XMFLOAT3(0.0f, 0.0f, 1.0f);
-    XMFLOAT3 cameraUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
-    FLOAT cameraNear = 0.01f;
-    FLOAT cameraFar = 100.0f;
-
+    // Read the config and generate objects within
+    ParseConfig("config.yml");
 
     // Load config values into first camera
     XMFLOAT3 yamlCameraPos = _config["debugCamera"]["position"].as<XMFLOAT3>();
-    _cameras.push_back(new Camera(yamlCameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::To));
+    _cameras.push_back(new BaseCamera(yamlCameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar));
     // Use values above for second camera
-    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::At));
+    _cameras.push_back(new BaseCamera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar));
     _currentCamera = _cameras.at(0);
 
     // Make Global Light
@@ -195,9 +186,29 @@ HRESULT Application::InitShadersAndInputLayout()
 	return hr;
 }
 
-void Application::LoadConfig(std::string configPath)
+void Application::ParseConfig(std::string configPath)
 {
     _config = YAML::LoadFile(configPath);
+
+    // Read cameras
+    for (YAML::Node camNode : _config["cameras"])
+    {
+        BaseCamera* cam = nullptr;
+
+        std::string camType = camNode["type"].as<std::string>();
+
+        XMFLOAT3 camPos = camNode["position"].as<XMFLOAT3>();
+        XMFLOAT3 camUp = camNode["up"].as<XMFLOAT3>();
+        XMFLOAT3 camLook = camNode["look"].as<XMFLOAT3>();
+        float camNear = camNode["near"].as<float>();
+        float camFar= camNode["far"].as<float>();
+
+        if (camType == "at")
+        {
+            LookAtCamera* lookAtCam = new LookAtCamera(camPos, camUp, camLook, _WindowWidth, _WindowHeight, camNear, camFar);
+            cam = (BaseCamera*)lookAtCam;
+        }
+    }
 
     // Read materials
     // TODO: Maybe make each of these its own conversion function in Structures.h

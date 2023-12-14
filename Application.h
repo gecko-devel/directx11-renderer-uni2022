@@ -9,7 +9,9 @@
 #include "DDSTextureLoader.h"
 #include "OBJLoader.h"
 #include "Structures.h"
-#include "Camera.h"
+#include "BaseCamera.h"
+#include "LookToCamera.h"
+#include "LookAtCamera.h"
 #include "GameObject.h"
 #include "yaml-cpp/yaml.h"
 
@@ -42,8 +44,8 @@ private:
 	float _deltaTime;
 
 	// Make Camera
-	Camera* _currentCamera;
-	std::vector<Camera*> _cameras;
+	BaseCamera* _currentCamera;
+	std::vector<BaseCamera*> _cameras;
 
 	// lighting vars
 	GlobalLight _globalLight;
@@ -53,7 +55,6 @@ private:
 
 	// Input vector
 	XMFLOAT3 _input;
-
 	FLOAT _cameraSpeed;
 
 	// Config file
@@ -66,7 +67,7 @@ private:
 	std::vector<GameObject*> _gameObjects;
 
 private:
-	void LoadConfig(std::string configPath);
+	void ParseConfig(std::string configPath);
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
 	void Cleanup();

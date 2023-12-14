@@ -4,27 +4,18 @@
 
 using namespace DirectX;
 
-enum LookVector
-{
-	To,
-	At
-};
-
-class Camera
+class BaseCamera
 {
 public:
 
-	Camera(XMFLOAT3 position, XMFLOAT3 to, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth, LookVector lookVector);
-	~Camera();
+	BaseCamera(XMFLOAT3 position, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth);
+	~BaseCamera();
 
 	// To have the camera move every frame.
-	void Update();
+	virtual void Update();
 
 	void SetPosition(XMFLOAT3 newPosition);
 	XMFLOAT3 GetPosition() { return _position; }
-
-	void SetTo(XMFLOAT3 newTo);
-	XMFLOAT3 GetTo() { return _to; }
 
 	void SetUp(XMFLOAT3 newUp);
 	XMFLOAT3 GetUp() { return _up; }
@@ -36,10 +27,9 @@ public:
 	// In case the window resizes at runtime
 	void ReShape(FLOAT newWindowWidth, FLOAT newWindowHeight, FLOAT newNearDepth, FLOAT newFarDepth);
 
-private:
+protected:
 	// Camera projection values
 	XMFLOAT3 _position;
-	XMFLOAT3 _to;
 	XMFLOAT3 _up;
 
 	FLOAT _windowHeight;
@@ -50,7 +40,5 @@ private:
 	// projection and view matrices to be passed to the shaders
 	XMFLOAT4X4 _view;
 	XMFLOAT4X4 _projection;
-
-	LookVector _lookVector;
 };
 

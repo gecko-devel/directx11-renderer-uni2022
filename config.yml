@@ -1,6 +1,17 @@
-debugCamera:
-  position: [0.0, 0.0, -10.0]
-  speed: 10.0
+cameras:
+  - type: "to"
+    position: [0.0, 0.0, -10.0]
+    up: [0.0, 1.0, 0.0]
+    look: [0.0, 0.0, 1.0]
+    near: 0.01
+    far: 100.0
+
+  - type: "at"
+    position: [0.0, 0.0, -20.0]
+    up: [0.0, 1.0, 0.0]
+    look: [0.0, 0.0, 0.0]
+    near: 0.01
+    far: 100.0
 
 materials:
   - name: "crate"
