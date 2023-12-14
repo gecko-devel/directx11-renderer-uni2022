@@ -30,9 +30,7 @@ struct PointLight
 {
     float4 color;
     float3 pos;
-    float radius;
     float attenuation;
-    float3 paddinglol;
 };
 
 //--------------------------------------------------------------------------------------
@@ -54,6 +52,7 @@ cbuffer ConstantBuffer : register( b0 )
     float3 EyePosW;
     
     float T;
+    int numPointLights;
 }
 
 //--------------------------------------------------------------------------------------
@@ -81,12 +80,6 @@ VS_OUTPUT VS(float3 Pos : POSITION, float3 Normal : NORMAL, float2 texcoord : TE
     
     // Normalise normals
     Normal = normalize(Normal);
-    
-    // -------
-    // GLOBAL LIGHT
-    
-    // Ambient Lighting
-    //output.Color += mGlobalLight.AmbLight * AmbMat;
     
     float3 NormalW = mul(Normal, World);
     NormalW = normalize(NormalW);
@@ -136,9 +129,8 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     // TODO: Somehow find a way to loop through arrays
     // The number 2 here represents how many point lights I *know* will be there. Which is bad.
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < numPointLights; i++)
     {
-        
         float3 directionToPointLight = normalize(PointLights[i].pos - input.PosW);
         float distanceToPointLight = length(PointLights[i].pos - input.PosW);
         float pointLightIntensity = 1 / 1 + pow(PointLights[i].attenuation * distanceToPointLight, 2);
@@ -150,8 +142,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
         // Specular
         potentialSpecular = PointLights[i].color * texSpec.Sample(sampLinear, input.TexCoord);
-        reflectDir = reflect(-directionToPointLight, normalize(input.NormalW));
-        reflectDir = normalize(reflectDir);
+        reflectDir = normalize(reflect(-directionToPointLight, normalize(input.NormalW)));
         specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), mGlobalLight.SpecPower);
         input.Color += (potentialSpecular * specularIntensity) * pointLightIntensity;
     }

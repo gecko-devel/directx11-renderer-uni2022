@@ -87,17 +87,15 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     // Add point lights
     PointLight pointLight1;
-    pointLight1.Pos = XMFLOAT3(-15.0f, 0.0f, 0.0f);
+    pointLight1.Pos = XMFLOAT3(-30.0f, 0.0f, -30.0f);
     pointLight1.Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-    pointLight1.Attenuation = 0.1f;
-    pointLight1.Radius = 3.0f;
+    pointLight1.Attenuation = 1.0f;
     PointLights[0] = pointLight1;
 
     PointLight pointLight2;
     pointLight2.Pos = XMFLOAT3(15.0f, 0.0f, 0.0f);
     pointLight2.Color = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
     pointLight2.Attenuation = 0.1f;
-    pointLight2.Radius = 3.0f;
     PointLights[1] = pointLight2;
 
     AmbientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -536,7 +534,7 @@ void Application::Update()
     //
     // Animate the YIPPEE
     //
-    XMStoreFloat4x4(&_world, XMMatrixScaling(0.7f, 0.7f, 0.7f) * XMMatrixRotationZ(_t) * XMMatrixRotationY(_t));
+    XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationX(_t));
 }
 
 void Application::Draw()
@@ -568,6 +566,7 @@ void Application::Draw()
     cb.SpecMat = SpecularMaterial;
     cb.EyePosW = EyeWorldPos;
     cb.mT = _t;
+    cb.numPointLights = 0;
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 

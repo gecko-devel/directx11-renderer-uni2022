@@ -39,9 +39,7 @@ struct PointLight
 {
 	XMFLOAT4 Color;
 	XMFLOAT3 Pos;
-	FLOAT Radius;
 	FLOAT Attenuation;
-	XMFLOAT3 PaddingLol;
 };
 
 struct ConstantBuffer
@@ -60,4 +58,5 @@ struct ConstantBuffer
 	XMFLOAT3 EyePosW;
 
 	float mT;
+	int numPointLights;
 };
