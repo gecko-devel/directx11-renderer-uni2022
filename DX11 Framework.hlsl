@@ -8,6 +8,13 @@
 // Shader vars
 //--------------------------------------------------------------------------------------
 Texture2D texDiffuse : register(t0);
+Texture2D texSpec : register(t1);
+Texture2D texNorm : register(t2);
+
+//Just another option
+//Texture2D texArray[2];
+
+
 SamplerState sampLinear : register(s0);
 
 //--------------------------------------------------------------------------------------
@@ -101,7 +108,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     // Specular lighting - if I can do this, I can do whatever the hell I want
     
-    float4 potentialSpecular = SpecLight * SpecMat;
+    float4 potentialSpecular = SpecLight * texSpec.Sample(sampLinear, input.TexCoord);
     
     float3 viewerDir = normalize(EyePosW - input.PosW);
     

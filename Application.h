@@ -85,7 +85,10 @@ private:
 	XMFLOAT3 EyeWorldPos;
 
 	// Texture vars
-	ID3D11ShaderResourceView* _pTextureRV = nullptr;
+	ID3D11ShaderResourceView* _pColorTextureRV = nullptr;
+	ID3D11ShaderResourceView* _pSpecularTextureRV = nullptr;
+	ID3D11ShaderResourceView* _pNormalTextureRV = nullptr;
+
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
 private:

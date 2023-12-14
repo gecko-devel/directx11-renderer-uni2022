@@ -94,8 +94,12 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     XMStoreFloat3(&EyeWorldPos, Eye);
 
     // Texture initialisation
-    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pTextureRV);
-    _pImmediateContext->PSSetShaderResources(0, 1, &_pTextureRV);
+    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pColorTextureRV);
+    _pImmediateContext->PSSetShaderResources(0, 1, &_pColorTextureRV);
+    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Create_SPEC.dds", nullptr, &_pSpecularTextureRV);
+    _pImmediateContext->PSSetShaderResources(1, 1, &_pSpecularTextureRV);
+    CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Create_NORM.dds", nullptr, &_pNormalTextureRV);
+    _pImmediateContext->PSSetShaderResources(2, 1, &_pNormalTextureRV);
 
     // Create mip-map sampler using DirectX 11
     D3D11_SAMPLER_DESC sampDesc;
@@ -222,8 +226,8 @@ HRESULT Application::InitVertexBuffer()
     {
         { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) }, //0
         { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) }, //1
-        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) }, //2
-        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) }, //3
+        { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) }, //2
+        { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) }, //3
 
         { XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) ,XMFLOAT2(0.5f, 0.0f) }, // 4 - tip
     };
@@ -302,8 +306,8 @@ HRESULT Application::InitIndexBuffer()
         //left
         4,1,3,
         // bottom
-        3,2,0,
-        1,3,0
+        2,3,0,
+        3,1,0
     };
 
     D3D11_BUFFER_DESC pyramidBd;
@@ -583,7 +587,7 @@ void Application::Update()
     //
     // Animate the cube
     //
-	XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t) * XMMatrixRotationZ(_t));
+    XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationX(_t));
 
     XMStoreFloat4x4(&_world2, XMMatrixScaling(0.2f, 0.2f, 0.2f) * XMMatrixRotationZ(_t / 2) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(_t / 2));
 
