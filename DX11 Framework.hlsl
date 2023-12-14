@@ -48,7 +48,7 @@ struct VS_OUTPUT
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
-VS_OUTPUT VS( float3 Pos : POSITION, float3 Normal : NORMAL, float3 PosW : POSITION0 )
+VS_OUTPUT VS(float3 Pos : POSITION, float3 Normal : NORMAL, float2 texcoord : TEXCOORD0)
 {
     float4 pos4 = float4(Pos, 1.0f);
     
@@ -76,6 +76,8 @@ VS_OUTPUT VS( float3 Pos : POSITION, float3 Normal : NORMAL, float3 PosW : POSIT
     
     // Ambient Lighting
     output.Color += AmbLight * AmbMat;
+    
+    output.TexCoord = texcoord;
 
     return output;
 }
