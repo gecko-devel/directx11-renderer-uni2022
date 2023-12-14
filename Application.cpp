@@ -94,6 +94,9 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Assign texture sampler to the shader register, so it knows to use it
     _pImmediateContext->PSSetSamplers(0, 1, &_pSamplerLinear);
 
+    // Create Blend State
+    _pd3dDevice->CreateBlendState()
+
 	return S_OK;
 }
 

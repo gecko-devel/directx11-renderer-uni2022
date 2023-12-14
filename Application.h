@@ -58,6 +58,8 @@ private:
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
+	ID3D11BlendState* _pBlendOverAlpha = nullptr;
+
 	// Input vector
 	XMFLOAT3 _input;
 	FLOAT _cameraSpeed;
