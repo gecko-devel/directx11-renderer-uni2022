@@ -196,9 +196,9 @@ float4 PS(VS_OUTPUT input) : SV_Target
             
             case 1: // Point Light
                 {
-                    float3 lightVector = normalize(lights[i].Position - input.PosW);
+                    float3 lightVector = lights[i].Position - input.PosW;
                     float distanceToLight = length(lightVector);
-                    lightVector = lightVector / distanceToLight;
+                    lightVector = normalize(lightVector);
             
                     float attenuation = Attenuation(lights[i], distanceToLight);
                 
@@ -210,8 +210,9 @@ float4 PS(VS_OUTPUT input) : SV_Target
             case 2: // Spot Light
                 {
                     // Get direction of the light to the current pixel's world position
-                    float3 lightVector = normalize(lights[i].Position - input.PosW);
+                    float3 lightVector = lights[i].Position - input.PosW;
                     float distanceToLight = length(lightVector);
+                    lightVector = normalize(lightVector);
         
                     // Falloff as light vector gets close to maximum angle to normal
                     // Most code is derived (not directly copied) from here: https://www.3dgep.com/texturing-lighting-directx-11/#Spotlight_Cone

@@ -32,7 +32,7 @@ materials:
     albedoPath: ""
     specularMapPath: ""
     ambient: [1.0, 1.0, 1.0, 1.0]
-    diffuse: [0.11, 0.64, 0.93, 0.6]
+    diffuse: [0.11, 0.64, 0.93, 0.4]
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 5.0
     isTranslucent: true
@@ -105,11 +105,11 @@ lighting:
   pointLights:
     - position: [4.0, 3.0, -4.0]
       color: [0.0, 0.0, 1.0, 1.0]
-      attenuation: 1
+      attenuation: .5
 
   spotLights:
     - position: [2, 5, 0]
       color: [0, 1, 0, 1]
-      attenuation: 2
+      attenuation: 0.1
       direction: [0, -1, 0]
       spotAngle: 10 # degrees
