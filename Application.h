@@ -14,6 +14,7 @@
 #include "LookAtCamera.h"
 #include "GameObject.h"
 #include "Input.h"
+#include "Time.h"
 #include "yaml-cpp/yaml.h"
 
 
@@ -40,9 +41,6 @@ private:
 
 	ID3D11DepthStencilView* _depthStencilView;
 	ID3D11Texture2D* _depthStencilBuffer;
-
-	float _t;
-	float _deltaTime;
 
 	// Make Camera
 	BaseCamera* _currentCamera;

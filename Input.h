@@ -4,14 +4,12 @@
 
 using namespace DirectX;
 
-static class Input
+class Input
 {
 public:
     static int GetVerticalAxis();
     static int GetHorizontalAxis();
     static int GetUpDownAxis();
 	static XMFLOAT3 Get3DInputVector();
-
-
 };
 
