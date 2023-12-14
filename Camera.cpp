@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-Camera::Camera(XMFLOAT3 position, XMFLOAT3 to, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth)
+Camera::Camera(XMFLOAT3 position, XMFLOAT3 to, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth, LookVector lookVector)
 {
 	_position = position;
 	_to = to;
@@ -9,6 +9,7 @@ Camera::Camera(XMFLOAT3 position, XMFLOAT3 to, XMFLOAT3 up, FLOAT windowWidth, F
 	_windowWidth = windowWidth;
 	_nearDepth = nearDepth;
 	_farDepth = farDepth;
+	_lookVector = lookVector;
 
 	Camera::Update();
 }
@@ -22,7 +23,23 @@ void Camera::Update()
 	XMVECTOR toVec = XMVectorSet(_to.x, _to.y, _to.z, 0.0f);
 	XMVECTOR upVec = XMVectorSet(_up.x, _up.y, _up.z, 0.0f);
 
-	XMStoreFloat4x4(&_view, XMMatrixLookToLH(positionVec, toVec, upVec));
+	// Decide between using LookTo or LookAt
+	if (_lookVector == LookVector::To)
+	{
+		// If length of vector is higher than 1, normalise it.
+		// 
+		// XMVector3Length() doesn't actually return a float with the length of the vector - it actually returns
+		// *another* XMVECTOR with the length slapped into each component. So we need to extract it from one of
+		// those components using XMVectorGetX(). Why? Because Microsoft.
+		if (XMVectorGetX(XMVector3Length(toVec)) >= 1.0f)
+			toVec = XMVector3Normalize(toVec); // In case the user passes a value higher
+		
+		XMStoreFloat4x4(&_view, XMMatrixLookToLH(positionVec, toVec, upVec));
+	}
+	else
+	{
+		XMStoreFloat4x4(&_view, XMMatrixLookAtLH(positionVec, toVec, upVec));
+	}
 
 	// Create the projection matrix
 	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _windowWidth / _windowHeight, 0.01f, 100.0f));

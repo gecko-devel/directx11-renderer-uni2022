@@ -4,10 +4,17 @@
 
 using namespace DirectX;
 
+enum LookVector
+{
+	To,
+	At
+};
+
 class Camera
 {
 public:
-	Camera(XMFLOAT3 position, XMFLOAT3 to, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth);
+
+	Camera(XMFLOAT3 position, XMFLOAT3 to, XMFLOAT3 up, FLOAT windowWidth, FLOAT windowHeight, FLOAT nearDepth, FLOAT farDepth, LookVector lookVector);
 	~Camera();
 
 	// To have the camera move every frame.
@@ -43,5 +50,7 @@ private:
 	// projection and view matrices to be passed to the shaders
 	XMFLOAT4X4 _view;
 	XMFLOAT4X4 _projection;
+
+	LookVector _lookVector;
 };
 

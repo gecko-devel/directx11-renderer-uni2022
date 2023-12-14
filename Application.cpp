@@ -70,13 +70,13 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     // Make cameras
     XMFLOAT3 cameraPos = XMFLOAT3(0.0f, 0.0f, -30.0f);
-    XMFLOAT3 cameraAt = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    XMFLOAT3 cameraAt = XMFLOAT3(0.0f, 0.0f, 1.0f);
     XMFLOAT3 cameraUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
     FLOAT cameraNear = 0.01f;
     FLOAT cameraFar = 100.0f;
 
-    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar));
-    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar));
+    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::To));
+    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar, LookVector::At));
     _currentCamera = _cameras.at(0);
 
     // Make Global Light
