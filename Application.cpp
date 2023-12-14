@@ -93,6 +93,11 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     SpecularPower = 5.0f;
     XMStoreFloat3(&EyeWorldPos, Eye);
 
+    FirstPointLight.Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    FirstPointLight.Radius = 2.0f;
+    FirstPointLight.Pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    FirstPointLight.Attenuation = 0.2f;
+
     // Texture initialisation
     CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pColorTextureRV);
     _pImmediateContext->PSSetShaderResources(0, 1, &_pColorTextureRV);
@@ -627,6 +632,7 @@ void Application::Draw()
     cb.SpecMat = SpecularMaterial;
     cb.SpecPower = SpecularPower;
     cb.EyePosW = EyeWorldPos;
+    cb.PointLight1 = FirstPointLight;
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 

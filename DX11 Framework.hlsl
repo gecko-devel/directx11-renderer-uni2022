@@ -17,6 +17,15 @@ Texture2D texNorm : register(t2);
 
 SamplerState sampLinear : register(s0);
 
+struct PointLight
+{
+    float4 color;
+    float3 pos;
+    float radius;
+    float attenuation;
+    float3 paddinglol;
+};
+
 //--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
@@ -40,6 +49,8 @@ cbuffer ConstantBuffer : register( b0 )
     float3 DirToLight;
     
     float T;
+    
+    PointLight PointLight1;
 }
 
 //--------------------------------------------------------------------------------------
@@ -85,7 +96,6 @@ VS_OUTPUT VS(float3 Pos : POSITION, float3 Normal : NORMAL, float2 texcoord : TE
     output.Color += AmbLight * AmbMat;
     
     output.TexCoord = texcoord;
-
     return output;
 }
 
@@ -94,7 +104,15 @@ VS_OUTPUT VS(float3 Pos : POSITION, float3 Normal : NORMAL, float2 texcoord : TE
 // Pixel Shader
 //--------------------------------------------------------------------------------------
 float4 PS(VS_OUTPUT input) : SV_Target
-{   
+{
+    // Ambient Lighting
+    input.Color += AmbLight * AmbMat;
+    
+    
+    // ----------------
+    // Directional Light
+    // ----------------
+    
     // Diffuse Lighting
     float4 potentialDiff = DiffLight * DiffMat;
     float difPercent = max(dot(normalize(DirToLight), normalize(input.NormalW)), 0);
@@ -103,10 +121,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     input.Color += DiffuseAmount * (DiffMat * DiffLight);
     
-    // Ambient Lighting
-    input.Color += AmbLight * AmbMat;
-    
-    // Specular lighting - if I can do this, I can do whatever the hell I want
+    // Specular lighting
     
     float4 potentialSpecular = SpecLight * texSpec.Sample(sampLinear, input.TexCoord);
     
@@ -119,7 +134,28 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     input.Color += (potentialSpecular * specularIntensity);
     
+    // ----------------
+    // PointLight
+    // ----------------
+    float3 directionToPointLight = normalize(PointLight1.pos - input.PosW);
+    float distanceToPointLight = length(PointLight1.pos - input.PosW);
+    float pointLightIntensity = 1 / 1 + pow(PointLight1.attenuation * distanceToPointLight, 2);
+    
+    // Diffuse
+    difPercent = max(dot(normalize(directionToPointLight), normalize(input.NormalW)), 0);
+    DiffuseAmount = difPercent * potentialDiff;
+    input.Color += (DiffuseAmount * (DiffMat * PointLight1.color)) * pointLightIntensity;
+    
+    // Specular
+    potentialSpecular = PointLight1.color * texSpec.Sample(sampLinear, input.TexCoord);
+    reflectDir = reflect(-directionToPointLight, normalize(input.NormalW));
+    reflectDir = normalize(reflectDir);
+    specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), SpecPower);
+    input.Color += (potentialSpecular * specularIntensity) * pointLightIntensity;
+    
+    // ----------------
     // Texturing
+    // ----------------
     float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
     input.Color *= textureColor;
     

@@ -17,6 +17,15 @@ struct SimpleVertex
 	XMFLOAT2 UV;
 };
 
+struct PointLight
+{
+	XMFLOAT4 Color;
+	XMFLOAT3 Pos;
+	FLOAT Radius;
+	FLOAT Attenuation;
+	XMFLOAT3 PaddingLol;
+};
+
 struct ConstantBuffer
 {
 	XMMATRIX mWorld;
@@ -37,6 +46,8 @@ struct ConstantBuffer
 	XMFLOAT3 DirToLight;
 
 	float mT;
+
+	PointLight PointLight1;
 };
 
 class Application
@@ -90,6 +101,9 @@ private:
 	ID3D11ShaderResourceView* _pNormalTextureRV = nullptr;
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
+
+	// Point Light instance
+	PointLight FirstPointLight;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
