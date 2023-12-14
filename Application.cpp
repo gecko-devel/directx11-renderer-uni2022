@@ -1,6 +1,4 @@
 #include "Application.h"
-#include "DDSTextureLoader.h"
-
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -107,6 +105,9 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_NORM.dds", nullptr, &_pNormalTextureRV);
     _pImmediateContext->PSSetShaderResources(2, 1, &_pNormalTextureRV);
+
+    // Import yippee OBJ
+    yippeeMeshData = OBJLoader::Load("models/TBH.obj", _pd3dDevice, false);
 
     // Create mip-map sampler using DirectX 11
     D3D11_SAMPLER_DESC sampDesc;
@@ -639,20 +640,16 @@ void Application::Draw()
 
     UINT stride = sizeof(SimpleVertex);
     UINT offset = 0;
-    _pImmediateContext->IASetVertexBuffers(0, 1, &_pPyramidVertexBuffer, &stride, &offset);
-    _pImmediateContext->IASetIndexBuffer(_pPyramidIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
+    _pImmediateContext->IASetVertexBuffers(0, 1, &yippeeMeshData.VertexBuffer, &yippeeMeshData.VBStride, &yippeeMeshData.VBOffset);
+    _pImmediateContext->IASetIndexBuffer(yippeeMeshData.VertexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     cb.AmbMat = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    //
-    // Renders a triangle
-    //
 	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
 	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
 	_pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
-	_pImmediateContext->DrawIndexed(18, 0, 0);        
+	_pImmediateContext->DrawIndexed(yippeeMeshData.IndexCount, 0, 0);        
 
     _pImmediateContext->IASetVertexBuffers(0, 1, &_pCubeVertexBuffer, &stride, &offset);
     _pImmediateContext->IASetIndexBuffer(_pCubeIndexBuffer, DXGI_FORMAT_R16_UINT, 0);

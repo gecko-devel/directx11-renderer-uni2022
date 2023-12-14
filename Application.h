@@ -3,52 +3,13 @@
 #include <windows.h>
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
-#include <directxmath.h>
 #include <directxcolors.h>
 #include "resource.h"
 #include "DDSTextureLoader.h"
+#include "OBJLoader.h"
+#include "Structures.h"
 
 using namespace DirectX;
-
-struct SimpleVertex
-{
-    XMFLOAT3 Pos;
-    XMFLOAT3 Normal;
-	XMFLOAT2 UV;
-};
-
-struct PointLight
-{
-	XMFLOAT4 Color;
-	XMFLOAT3 Pos;
-	FLOAT Radius;
-	FLOAT Attenuation;
-	XMFLOAT3 PaddingLol;
-};
-
-struct ConstantBuffer
-{
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
-
-	XMFLOAT4 AmbLight;
-	XMFLOAT4 AmbMat;
-
-	XMFLOAT4 DiffLight;
-	XMFLOAT4 DiffMat;
-
-	XMFLOAT4 SpecMat;
-	XMFLOAT4 SpecLight;
-	XMFLOAT3 EyePosW;
-	FLOAT SpecPower;
-
-	XMFLOAT3 DirToLight;
-
-	float mT;
-
-	PointLight PointLight1;
-};
 
 class Application
 {
@@ -104,6 +65,9 @@ private:
 
 	// Point Light instance
 	PointLight FirstPointLight;
+
+	// Imported model
+	MeshData yippeeMeshData;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
