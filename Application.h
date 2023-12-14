@@ -13,6 +13,7 @@
 #include "LookToCamera.h"
 #include "LookAtCamera.h"
 #include "GameObject.h"
+#include "Input.h"
 #include "yaml-cpp/yaml.h"
 
 

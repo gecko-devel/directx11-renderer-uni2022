@@ -388,6 +388,7 @@
     <ClCompile Include="DX11 Framework.cpp" />
     <ClCompile Include="BaseCamera.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="LookAtCamera.cpp" />
     <ClCompile Include="LookToCamera.cpp" />
     <ClCompile Include="OBJLoader.cpp" />
@@ -397,6 +398,7 @@
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="BaseCamera.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="LookAtCamera.h" />
     <ClInclude Include="LookToCamera.h" />
     <ClInclude Include="Structures.h" />

@@ -19,6 +19,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="LookToCamera.h" />
     <ClInclude Include="LookAtCamera.h" />
+    <ClInclude Include="Input.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -29,6 +30,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="LookToCamera.cpp" />
     <ClCompile Include="LookAtCamera.cpp" />
+    <ClCompile Include="Input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

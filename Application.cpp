@@ -40,7 +40,7 @@ Application::Application()
 	_pVertexLayout = nullptr;
 	_pConstantBuffer = nullptr;
 
-    YAML::Node config = YAML::LoadFile("config.yaml");
+    YAML::Node config = YAML::LoadFile("config.yml");
 
     _cameraSpeed = 30.0f;
 }
@@ -79,7 +79,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     _currentCamera = _cameras[0];
 
     // Make Global Light
-    _globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
+    _globalLight.AmbientLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     _globalLight.DiffuseLight = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
     _globalLight.SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     _globalLight.DirectionToLight = XMFLOAT4(-0.5f, 0.5f, 0.0f, 0.0f);
@@ -539,9 +539,7 @@ void Application::Update()
         _currentCamera = _cameras.at(1);
 
     // Get input vector from WASD + QE for up/down
-    _input = XMFLOAT3((int)GetAsyncKeyState(0x41) - (int)GetAsyncKeyState(0x44), // A and D
-                      (int)GetAsyncKeyState(0x51) - (int)GetAsyncKeyState(0x45), // Q and E
-                      (int)GetAsyncKeyState(0x53) - (int)GetAsyncKeyState(0x57));// S and W
+    _input = Input::Get3DInputVector();
 
     // Animate the world
     XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t));

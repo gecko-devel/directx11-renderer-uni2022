@@ -1,6 +1,6 @@
 cameras:
   - type: "to"
-    position: [0.0, 0.0, -10.0]
+    position: [0.0, 0.0, -30.0]
     up: [0.0, 1.0, 0.0]
     look: [0.0, 0.0, 1.0]
     near: 0.01
@@ -23,9 +23,24 @@ materials:
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 3.0
 
+  - name: "tbh"
+    albedoPath: ""
+    normalMapPath: ""
+    specularMapPath: ""
+    ambient: [5.0, 5.0, 5.0, 1.0]
+    diffuse: [1.0, 1.0, 1.0, 1.0]
+    specular: [1.0, 1.0, 1.0, 1.0]
+    specularPower: 3.0
+
 gameObjects:
   - modelPath: "models\\cube.obj"
     material: "crate"
+    position: [0.0, 30.0, 0.0]
+    scale: [1.0, 0.0, 1.0]
+    rotation: [0.0, 0.0, 0.0]
+
+  - modelPath: "models\\TBH.obj"
+    material: "tbh"
     position: [0.0, 0.0, 0.0]
     scale: [1.0, 1.0, 1.0]
-    rotation: [0.0, 0.0, 0.0]
+    rotation: [0.0, -90.0, 0.0]
