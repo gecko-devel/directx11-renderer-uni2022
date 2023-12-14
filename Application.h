@@ -39,7 +39,8 @@ private:
 	float _t;
 
 	// Make Camera
-	Camera* _camera;
+	Camera* _currentCamera;
+	std::vector<Camera*> _cameras;
 
 	// lighting vars
 	GlobalLight globalLight;

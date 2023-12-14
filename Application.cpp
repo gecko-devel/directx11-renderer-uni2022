@@ -68,14 +68,16 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	// Initialize the world matrix
 	XMStoreFloat4x4(&_world, XMMatrixIdentity());
 
-    // Make camera
+    // Make cameras
     XMFLOAT3 cameraPos = XMFLOAT3(0.0f, 0.0f, -30.0f);
     XMFLOAT3 cameraAt = XMFLOAT3(0.0f, 0.0f, 0.0f);
     XMFLOAT3 cameraUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
     FLOAT cameraNear = 0.01f;
     FLOAT cameraFar = 100.0f;
 
-    _camera = new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar);
+    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar));
+    _cameras.push_back(new Camera(cameraPos, cameraAt, cameraUp, _WindowWidth, _WindowHeight, cameraNear, cameraFar));
+    _currentCamera = _cameras.at(0);
 
     // Make Global Light
     globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
@@ -519,20 +521,42 @@ void Application::Update()
         _t = (dwTimeCur - dwTimeStart) / 1000.0f;
     }
 
+    // If K is pressed, go to wireframe render state.
     if (GetAsyncKeyState(0x4B))
     {
         _pImmediateContext->RSSetState(_wireframe);
     }
 
+    // If L is pressed, return to normal render state.
     if (GetAsyncKeyState(0x4C))
     {
         _pImmediateContext->RSSetState(nullptr);
     }
 
-    //
+    // If Q is pressed, switch to camera 0.
+    if (GetAsyncKeyState(0x51))
+    {
+        _currentCamera = _cameras.at(0);
+    }
+
+    // If W is pressed, switch to camera 1.
+    if (GetAsyncKeyState(0x57))
+    {
+        _currentCamera = _cameras.at(1);
+    }
+
     // Animate the YIPPEE
-    //
     XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t));
+
+    // Animate the cameras
+    XMFLOAT3 cam0Pos = _cameras.at(0)->GetPosition();
+    _cameras.at(0)->SetPosition(XMFLOAT3(cam0Pos.x, -30.0f * sin(_t), cam0Pos.z));
+
+    XMFLOAT3 cam1Pos = _cameras.at(1)->GetPosition();
+    _cameras.at(1)->SetPosition(XMFLOAT3(-30.0f * sin(_t), cam1Pos.y, cam0Pos.z));
+
+    // Update the camera
+    _currentCamera->Update();
 }
 
 void Application::Draw()
@@ -547,8 +571,8 @@ void Application::Draw()
 
     // Set the world, view, and projection matrices
 	XMMATRIX world = XMLoadFloat4x4(&_world);
-	XMMATRIX view = XMLoadFloat4x4(&_camera->GetView());
-	XMMATRIX projection = XMLoadFloat4x4(&_camera->GetProjection());
+	XMMATRIX view = XMLoadFloat4x4(&_currentCamera->GetView());
+	XMMATRIX projection = XMLoadFloat4x4(&_currentCamera->GetProjection());
 
     //
     // Update variables
@@ -562,7 +586,7 @@ void Application::Draw()
     cb.AmbMat = AmbientMaterial;
     cb.DiffMat = DiffuseMaterial;
     cb.SpecMat = SpecularMaterial;
-    cb.EyePosW = _camera->GetPosition();
+    cb.EyePosW = _currentCamera->GetPosition();
     cb.mT = _t;
     cb.numPointLights = 2;
 
