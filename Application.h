@@ -43,12 +43,12 @@ private:
 	std::vector<Camera*> _cameras;
 
 	// lighting vars
-	GlobalLight globalLight;
-	PointLight PointLights[20];
+	GlobalLight _globalLight;
+	PointLight _pointLights[20];
 
-	XMFLOAT4 AmbientMaterial;
-	XMFLOAT4 DiffuseMaterial;
-	XMFLOAT4 SpecularMaterial;
+	XMFLOAT4 _ambientMaterial;
+	XMFLOAT4 _diffuseMaterial;
+	XMFLOAT4 _specularMaterial;
 
 	// Texture vars
 	ID3D11ShaderResourceView* _pColorTextureRV = nullptr;
@@ -58,7 +58,10 @@ private:
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
 	// Imported model
-	MeshData yippeeMeshData;
+	MeshData _yippeeMeshData;
+
+	// Input vector
+	XMFLOAT2 _input;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);

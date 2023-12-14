@@ -80,29 +80,29 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     _currentCamera = _cameras.at(0);
 
     // Make Global Light
-    globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
-    globalLight.DiffuseLight = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-    globalLight.SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    globalLight.DirectionToLight = XMFLOAT3(-0.5f, 0.5f, 0.0f);
-    globalLight.SpecularPower = 5.0f;
+    _globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
+    _globalLight.DiffuseLight = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+    _globalLight.SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    _globalLight.DirectionToLight = XMFLOAT3(-0.5f, 0.5f, 0.0f);
+    _globalLight.SpecularPower = 5.0f;
 
     // Add point lights
     PointLight pointLight1;
     pointLight1.Pos = XMFLOAT3(-30.0f, 0.0f, -30.0f);
     pointLight1.Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
     pointLight1.Attenuation = 0.01f;
-    PointLights[0] = pointLight1;
+    _pointLights[0] = pointLight1;
 
     PointLight pointLight2;
     pointLight2.Pos = XMFLOAT3(15.0f, 0.0f, 0.0f);
     pointLight2.Color = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
     pointLight2.Attenuation = 0.01f;
-    PointLights[1] = pointLight2;
+    _pointLights[1] = pointLight2;
 
     // Define materials for the lights. Remove this later when encapsulated.
-    AmbientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    DiffuseMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    SpecularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    _ambientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    _diffuseMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    _specularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Texture initialisation
     CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pColorTextureRV);
@@ -115,7 +115,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     _pImmediateContext->PSSetShaderResources(2, 1, &_pNormalTextureRV);
 
     // Import yippee OBJ
-    yippeeMeshData = OBJLoader::Load("models/TBH.obj", _pd3dDevice, false);
+    _yippeeMeshData = OBJLoader::Load("models/TBH.obj", _pd3dDevice, false);
 
     // Create mip-map sampler using DirectX 11
     D3D11_SAMPLER_DESC sampDesc;
@@ -523,29 +523,24 @@ void Application::Update()
 
     // If K is pressed, go to wireframe render state.
     if (GetAsyncKeyState(0x4B))
-    {
         _pImmediateContext->RSSetState(_wireframe);
-    }
 
     // If L is pressed, return to normal render state.
     if (GetAsyncKeyState(0x4C))
-    {
         _pImmediateContext->RSSetState(nullptr);
-    }
 
-    // If Q is pressed, switch to camera 0.
-    if (GetAsyncKeyState(0x51))
-    {
+    // If 1 is pressed, switch to camera 0.
+    if (GetAsyncKeyState(0x31))
         _currentCamera = _cameras.at(0);
-    }
 
-    // If W is pressed, switch to camera 1.
-    if (GetAsyncKeyState(0x57))
-    {
+    // If 2 is pressed, switch to camera 1.
+    if (GetAsyncKeyState(0x32))
         _currentCamera = _cameras.at(1);
-    }
 
-    // Animate the YIPPEE
+    // Get input vector from WASD
+    _input = XMFLOAT2((int)GetAsyncKeyState(0x41) - (int)GetAsyncKeyState(0x44), (int)GetAsyncKeyState(0x53) - (int)GetAsyncKeyState(0x57));
+
+    // Animate the world
     XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t));
 
     // Animate the cameras
@@ -581,11 +576,11 @@ void Application::Draw()
 	cb.mWorld = XMMatrixTranspose(world);
 	cb.mView = XMMatrixTranspose(view);
 	cb.mProjection = XMMatrixTranspose(projection);
-    cb.globalLight = globalLight;
-    std::copy(std::begin(PointLights), std::end(PointLights), std::begin(cb.PointLights));
-    cb.AmbMat = AmbientMaterial;
-    cb.DiffMat = DiffuseMaterial;
-    cb.SpecMat = SpecularMaterial;
+    cb.globalLight = _globalLight;
+    std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.PointLights));
+    cb.AmbMat = _ambientMaterial;
+    cb.DiffMat = _diffuseMaterial;
+    cb.SpecMat = _specularMaterial;
     cb.EyePosW = _currentCamera->GetPosition();
     cb.mT = _t;
     cb.numPointLights = 2;
@@ -597,8 +592,8 @@ void Application::Draw()
 
     cb.AmbMat = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     // Set vertex and index buffers to draw the model
-    _pImmediateContext->IASetVertexBuffers(0, 1, &yippeeMeshData.VertexBuffer, &yippeeMeshData.VBStride, &yippeeMeshData.VBOffset);
-    _pImmediateContext->IASetIndexBuffer(yippeeMeshData.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    _pImmediateContext->IASetVertexBuffers(0, 1, &_yippeeMeshData.VertexBuffer, &_yippeeMeshData.VBStride, &_yippeeMeshData.VBOffset);
+    _pImmediateContext->IASetIndexBuffer(_yippeeMeshData.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
     // Set the shaders to use
     _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
 	_pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
@@ -606,7 +601,7 @@ void Application::Draw()
 	_pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
     _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);
     // DRAW!
-	_pImmediateContext->DrawIndexed(yippeeMeshData.IndexCount, 0, 0);        
+	_pImmediateContext->DrawIndexed(_yippeeMeshData.IndexCount, 0, 0);        
 
     //
     // Present our back buffer to our front buffer
