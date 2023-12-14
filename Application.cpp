@@ -362,6 +362,9 @@ HRESULT Application::InitDevice()
     if (FAILED(hr))
         return hr;
 
+
+    //Depth creation here
+
     _pImmediateContext->OMSetRenderTargets(1, &_pRenderTargetView, nullptr);
 
     // Setup the viewport

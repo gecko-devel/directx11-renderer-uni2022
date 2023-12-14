@@ -43,6 +43,9 @@ private:
 	XMFLOAT4X4              _view;
 	XMFLOAT4X4              _projection;
 
+	ID3D11DepthStencilView* _depthStencilView;
+	ID3D11Texture2D* _depthStencilBuffer;
+
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
