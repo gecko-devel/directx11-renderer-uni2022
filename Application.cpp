@@ -78,16 +78,17 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Initialize the projection matrix
 	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
 
-    AmbientLight = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.2f);
+    AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
     AmbientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    DiffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    DiffuseMaterial = XMFLOAT4(0.5f, 1.0f, 1.0f, 1.0f);
-    directionToLight = XMFLOAT3(0.0f, 0.5f, -0.5f);
+    directionToLight = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
-    SpecularLight = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+    DiffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    DiffuseMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+    SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     SpecularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    SpecularPower = 5.0f;
+    SpecularPower = 10.0f;
     XMStoreFloat3(&EyeWorldPos, Eye);
 
 	return S_OK;

@@ -27,12 +27,13 @@ struct ConstantBuffer
 
 	XMFLOAT4 DiffLight;
 	XMFLOAT4 DiffMat;
-	XMFLOAT3 DirToLight;
 
 	XMFLOAT4 SpecMat;
 	XMFLOAT4 SpecLight;
-	FLOAT SpecPower;
 	XMFLOAT3 EyePosW;
+	FLOAT SpecPower;
+
+	XMFLOAT3 DirToLight;
 
 	float mT;
 };
