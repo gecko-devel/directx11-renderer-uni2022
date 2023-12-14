@@ -100,11 +100,31 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float4 diffuse = float4(0.0, 0.0, 0.0, 0.0);
     float4 specular = float4(0.0, 0.0, 0.0, 0.0);
     
-    // Get direction from pixel to viewpoint
+    // Ambient Lighting
+    ambient = mGlobalLight.AmbLight * AmbMat;
+    
+    // ----------------
+    // GlobalLight
+    // ----------------
+    // Diffuse
+    float4 potentialDiff = mGlobalLight.DiffLight * DiffMat;
+    float difPercent = max(dot(normalize(mGlobalLight.DirectionToLight), normalize(input.NormalW)), 0);
+    float DiffuseAmount = difPercent * potentialDiff;
+    diffuse += DiffuseAmount * (DiffMat * mGlobalLight.DiffLight);
+    
+    // Specular
+    float4 potentialSpecular;
+    
+    if (hasSpecularMapTexture)
+        potentialSpecular = mGlobalLight.SpecLight * texSpec.Sample(sampLinear, input.TexCoord);
+    else
+        potentialSpecular = mGlobalLight.SpecLight;
+     
     float3 viewerDir = normalize(EyePosW - input.PosW);
     
-    // Ambient Lighting
-    ambient = ambientLight * AmbMat;
+    // ----------------
+    // PointLights
+    // ----------------
     
     // DirectionalLights
     for (int i = 0; i < numDirectionalLights; i++)

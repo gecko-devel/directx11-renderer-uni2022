@@ -30,7 +30,7 @@ struct MeshData
 struct DirectionalLight
 {
 	XMFLOAT4 Color;
-    XMFLOAT4 Direction;
+	XMFLOAT3 Direction;
 };
 
 struct PointLight
