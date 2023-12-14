@@ -48,13 +48,9 @@ private:
 	// lighting vars
 	XMFLOAT4 _ambientLight;
 
-	DirectionalLight _directionalLights[20];
-	PointLight _pointLights[20];
-	SpotLight _spotLights[20];
+	Light _lights[20];
 
-	int _numDirectionalLights;
-	int _numPointLights;
-	int _numSpotLights;
+	int _numLights;
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 

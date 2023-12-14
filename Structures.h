@@ -5,6 +5,13 @@
 
 using namespace DirectX;
 
+enum LightType
+{
+	DIRECTIONAL_LIGHT = 0,
+	POINT_LIGHT = 1,
+	SPOT_LIGHT = 2
+};
+
 struct SimpleVertex
 {
 	XMFLOAT3 Pos;
@@ -19,12 +26,12 @@ struct SimpleVertex
 
 struct Fog
 {
-private:
-	XMFLOAT2 padding;
 public:
+	XMFLOAT4 Color;
 	float Start;
 	float Range;
-	XMFLOAT4 Color;
+private:
+	XMFLOAT2 _padding;
 };
 
 struct MeshData
@@ -36,30 +43,20 @@ struct MeshData
 	UINT IndexCount;
 };
 
-struct DirectionalLight
-{
-	XMFLOAT4 Color;
-	XMFLOAT3 Direction;
-};
-
-struct PointLight
-{
-	XMFLOAT4 Color;
-	XMFLOAT3 Position;
-	FLOAT Attenuation;
-};
-
-
-struct SpotLight
+struct Light
 {
 public:
 	XMFLOAT4 Color;
+	// -------------- 16 bytes
 	XMFLOAT3 Direction;
-	FLOAT MaxAngle;
+	LightType lightType;
+	// -------------- 16 bytes
 	XMFLOAT3 Position;
 	FLOAT Attenuation;
+	// -------------- 16 bytes
+	FLOAT SpotAngle;
 private:
-	XMFLOAT4 _padding;
+	XMFLOAT3 _padding;
 };
 
 struct Material
@@ -77,34 +74,30 @@ struct Material
 
 struct ConstantBuffer
 {
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
+	XMMATRIX World;
+	XMMATRIX View;
+	XMMATRIX Projection;
 
-	SpotLight spotLights[20];
-
-	XMFLOAT4 ambientLight;
+	XMFLOAT4 AmbientLight;
 
 	Fog fog;
 
-	DirectionalLight directionalLights[20];
-	PointLight pointLights[20];
+	Light lights[20];
 
 	XMFLOAT4 AmbMat;
 	XMFLOAT4 DiffMat;
 	XMFLOAT4 SpecMat;
 
+	XMFLOAT3 EyePosW;
+
 	int hasAlbedoTextue = 0;
 	int hasSpecularMapTextue = 0;
 
+	int numLights;
+
 	float specularPower;
 
-	int numSpotLights;
-	
-	XMFLOAT3 EyePosW;
-
-	int numPointLights;
-	int numDirectionalLights;
+	float _padding;
 };
 
 // Conversion functions for YAML yoinked and edited from here:

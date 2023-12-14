@@ -311,52 +311,51 @@ void Application::ParseConfig(std::string configPath)
     // Read ambient light
     _ambientLight = _config["lighting"]["ambientLight"].as<XMFLOAT4>();
 
-    // Read directional lights
+    // Read lights
     int i = 0;
+
     for (YAML::Node dlNode : _config["lighting"]["directionalLights"])
     {
-        DirectionalLight directionalLight;
+        Light light;
+        light.lightType = DIRECTIONAL_LIGHT;
 
-        directionalLight.Color = dlNode["color"].as<XMFLOAT4>();
-        directionalLight.Direction = dlNode["direction"].as<XMFLOAT4>();
+        light.Color = dlNode["color"].as<XMFLOAT4>();
+        light.Direction = dlNode["direction"].as<XMFLOAT3>();
 
-        _directionalLights[i] = directionalLight;
+        _lights[i] = light;
         i++;
     }
-    _numDirectionalLights = i;
 
     // Read point lights
-    i = 0;
     for (YAML::Node plNode : _config["lighting"]["pointLights"])
     {
-        PointLight pointLight;
+        Light light;
+        light.lightType = POINT_LIGHT;
 
-        pointLight.Color = plNode["color"].as<XMFLOAT4>();
-        pointLight.Position = plNode["position"].as<XMFLOAT3>();
-        pointLight.Attenuation = plNode["attenuation"].as<float>();
+        light.Color = plNode["color"].as<XMFLOAT4>();
+        light.Position = plNode["position"].as<XMFLOAT3>();
+        light.Attenuation = plNode["attenuation"].as<float>();
 
-        _pointLights[i] = pointLight;
+        _lights[i] = light;
         i++;
     }
-    _numPointLights = i;
 
     // Read spotlights
-    i = 0;
     for (YAML::Node slNode : _config["lighting"]["spotLights"])
     {
-        SpotLight spotLight;
+        Light light;
+        light.lightType = SPOT_LIGHT;
 
-        spotLight.Color = slNode["color"].as<XMFLOAT4>();
-        spotLight.Position = slNode["position"].as<XMFLOAT3>();
-        spotLight.Attenuation = slNode["attenuation"].as<float>();
-        spotLight.Direction = slNode["direction"].as<XMFLOAT3>();
-        spotLight.MaxAngle = slNode["maxAngle"].as<float>();
+        light.Color = slNode["color"].as<XMFLOAT4>();
+        light.Position = slNode["position"].as<XMFLOAT3>();
+        light.Attenuation = slNode["attenuation"].as<float>();
+        light.Direction = slNode["direction"].as<XMFLOAT3>();
+        light.SpotAngle = slNode["spotAngle"].as<float>();
 
-        _spotLights[i] = spotLight;
+        _lights[i] = light;
         i++;
     }
-    _numSpotLights = i;
-
+    _numLights = i;
 }
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
@@ -637,31 +636,22 @@ void Application::Draw()
 
         // Make a constant buffer template with new shader variable values
         ConstantBuffer cb;
-        cb.mWorld = XMMatrixTranspose(world);
-        cb.mView = XMMatrixTranspose(view);
+        cb.World = XMMatrixTranspose(world);
+        cb.View = XMMatrixTranspose(view);
+        cb.Projection = XMMatrixTranspose(projection);
 
-        cb.mProjection = XMMatrixTranspose(projection);
-
-        cb.ambientLight = _ambientLight;
+        cb.AmbientLight = _ambientLight;
 
         cb.fog = _fog;
 
-        std::copy(std::begin(_directionalLights), std::end(_directionalLights), std::begin(cb.directionalLights)); // copy pointlights to constant buffer
-        std::copy(std::begin(_pointLights), std::end(_pointLights), std::begin(cb.pointLights)); // copy pointlights to constant buffer
-        std::copy(std::begin(_spotLights), std::end(_spotLights), std::begin(cb.spotLights)); // copy spotlights to constant buffer
+        std::copy(std::begin(_lights), &_lights[_numLights], std::begin(cb.lights)); // copy lights to constant buffer
 
         cb.AmbMat = go->GetMaterial()->AmbientReflectivity;
         cb.DiffMat = go->GetMaterial()->DiffuseReflectivity;
         cb.SpecMat = go->GetMaterial()->SpecularReflectivity;
 
-        cb.specularPower = go->GetMaterial()->SpecularPower;
-
         cb.EyePosW = _currentCamera->GetPosition();
 
-        cb.numDirectionalLights = _numDirectionalLights;
-        cb.numPointLights = _numPointLights;
-        cb.numSpotLights = _numSpotLights;
-        
         // Check for albedo texture
         if ((go->GetMaterial()->AlbedoTexture) != nullptr)
         {
@@ -685,6 +675,10 @@ void Application::Draw()
         {
             cb.hasSpecularMapTextue = 0;
         }
+
+        cb.numLights = _numLights;
+
+        cb.specularPower = go->GetMaterial()->SpecularPower;
 
         // Update the shader variables using the constant buffer struct
         _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
