@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -25,6 +26,15 @@ struct MeshData
 	UINT IndexCount;
 };
 
+struct GlobalLight
+{
+	XMFLOAT4 AmbientLight;
+	XMFLOAT4 DiffuseLight;
+	XMFLOAT4 SpecularLight;
+	XMFLOAT3 DirectionToLight;
+	FLOAT SpecularPower; // Power to raise falloff by. Harshness of the light, basically.
+};
+
 struct PointLight
 {
 	XMFLOAT4 Color;
@@ -40,20 +50,14 @@ struct ConstantBuffer
 	XMMATRIX mView;
 	XMMATRIX mProjection;
 
-	XMFLOAT4 AmbLight;
+	GlobalLight globalLight;
+	PointLight PointLights[20];
+
 	XMFLOAT4 AmbMat;
-
-	XMFLOAT4 DiffLight;
 	XMFLOAT4 DiffMat;
-
 	XMFLOAT4 SpecMat;
-	XMFLOAT4 SpecLight;
+	
 	XMFLOAT3 EyePosW;
-	FLOAT SpecPower;
-
-	XMFLOAT3 DirToLight;
 
 	float mT;
-
-	PointLight PointLight1;
 };

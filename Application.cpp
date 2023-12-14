@@ -78,23 +78,33 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     // Initialize the projection matrix
 	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
 
-    AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
+    // Make Global Light
+    globalLight.AmbientLight = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
+    globalLight.DiffuseLight = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+    globalLight.SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    globalLight.DirectionToLight = XMFLOAT3(-0.5f, 0.5f, 0.0f);
+    globalLight.SpecularPower = 5.0f;
+
+    // Add point lights
+    PointLight pointLight1;
+    pointLight1.Pos = XMFLOAT3(-15.0f, 0.0f, 0.0f);
+    pointLight1.Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+    pointLight1.Attenuation = 0.1f;
+    pointLight1.Radius = 3.0f;
+    PointLights[0] = pointLight1;
+
+    PointLight pointLight2;
+    pointLight2.Pos = XMFLOAT3(15.0f, 0.0f, 0.0f);
+    pointLight2.Color = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+    pointLight2.Attenuation = 0.1f;
+    pointLight2.Radius = 3.0f;
+    PointLights[1] = pointLight2;
+
     AmbientMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-    directionToLight = XMFLOAT3(0.0f, 0.0f, -1.0f);
-
-    DiffuseLight = XMFLOAT4(0.5f, 1.0f, 1.0f, 1.0f);
     DiffuseMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-    SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     SpecularMaterial = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    SpecularPower = 5.0f;
-    XMStoreFloat3(&EyeWorldPos, Eye);
 
-    FirstPointLight.Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-    FirstPointLight.Radius = 2.0f;
-    FirstPointLight.Pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    FirstPointLight.Attenuation = 0.2f;
+    XMStoreFloat3(&EyeWorldPos, Eye);
 
     // Texture initialisation
     CreateDDSTextureFromFile(_pd3dDevice, L"textures\\Crate_COLOR.dds", nullptr, &_pColorTextureRV);
@@ -526,7 +536,7 @@ void Application::Update()
     //
     // Animate the YIPPEE
     //
-    XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(_t));
+    XMStoreFloat4x4(&_world, XMMatrixScaling(0.7f, 0.7f, 0.7f) * XMMatrixRotationZ(_t) * XMMatrixRotationY(_t));
 }
 
 void Application::Draw()
@@ -551,17 +561,13 @@ void Application::Draw()
 	cb.mWorld = XMMatrixTranspose(world);
 	cb.mView = XMMatrixTranspose(view);
 	cb.mProjection = XMMatrixTranspose(projection);
-    cb.mT = _t;
-    cb.AmbLight = AmbientLight;
+    cb.globalLight = globalLight;
+    std::copy(std::begin(PointLights), std::end(PointLights), std::begin(cb.PointLights));
     cb.AmbMat = AmbientMaterial;
-    cb.DiffLight = DiffuseLight;
     cb.DiffMat = DiffuseMaterial;
-    cb.DirToLight = directionToLight;
-    cb.SpecLight = SpecularLight;
     cb.SpecMat = SpecularMaterial;
-    cb.SpecPower = SpecularPower;
     cb.EyePosW = EyeWorldPos;
-    cb.PointLight1 = FirstPointLight;
+    cb.mT = _t;
 
 	_pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 

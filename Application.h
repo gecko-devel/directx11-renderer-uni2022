@@ -40,18 +40,13 @@ private:
 	float _t;
 
 	// lighting vars
-	XMFLOAT4 AmbientLight;
+	GlobalLight globalLight;
+	PointLight PointLights[20];
+
 	XMFLOAT4 AmbientMaterial;
-
-	// Diffuse vars
 	XMFLOAT4 DiffuseMaterial;
-	XMFLOAT4 DiffuseLight;
-	XMFLOAT3 directionToLight;
-
-	// Specular vars
 	XMFLOAT4 SpecularMaterial;
-	XMFLOAT4 SpecularLight;
-	FLOAT SpecularPower; // Power to raise falloff by. Harshness of the light, basically.
+
 	XMFLOAT3 EyeWorldPos;
 
 	// Texture vars
@@ -60,9 +55,6 @@ private:
 	ID3D11ShaderResourceView* _pNormalTextureRV = nullptr;
 
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
-
-	// Point Light instance
-	PointLight FirstPointLight;
 
 	// Imported model
 	MeshData yippeeMeshData;
