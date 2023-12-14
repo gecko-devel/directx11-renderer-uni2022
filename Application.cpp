@@ -84,19 +84,6 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     _globalLight.SpecularLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     _globalLight.DirectionToLight = XMFLOAT4(-0.5f, 0.5f, 0.0f, 0.0f);
 
-    // Add point lights
-    PointLight pointLight1;
-    pointLight1.Pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    pointLight1.Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-    pointLight1.Attenuation = 0.3f;
-    _pointLights[0] = pointLight1;
-
-    PointLight pointLight2;
-    pointLight2.Pos = XMFLOAT3(15.0f, 0.0f, 0.0f);
-    pointLight2.Color = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-    pointLight2.Attenuation = 1.0f;
-    _pointLights[1] = pointLight2;
-
     // Create mip-map sampler using DirectX 11
     D3D11_SAMPLER_DESC sampDesc;
     ZeroMemory(&sampDesc, sizeof(sampDesc)); // Fill with zeros. Makes sure it's allocated but empty.
@@ -276,24 +263,29 @@ void Application::ParseConfig(std::string configPath)
     {
         GameObject* go = new GameObject();
 
-        // Set mesh
         // I HATE STRINGS AND THEIR MANY FORMS
         go->SetMeshData(OBJLoader::Load(const_cast<char*>(goNode["modelPath"].as<std::string>().c_str()), _pd3dDevice, false));
-        
-        // Set material
         go->SetMaterial(_materials[goNode["material"].as<std::string>()]);
-
-        // Set position
         go->SetPosition(goNode["position"].as<XMFLOAT3>());
-
-        // Set scale
         go->SetScale(goNode["scale"].as<XMFLOAT3>());
-
-        // Set Rot
         go->SetRotation(goNode["rotation"].as<XMFLOAT3>());
 
         // Load gameobject into the vector
         _gameObjects.push_back(go);
+    }
+
+    // Read point lights
+    int i = 0;
+    for (YAML::Node plNode : _config["pointLights"])
+    {
+        PointLight pointLight;
+
+        pointLight.Color = plNode["color"].as<XMFLOAT4>();
+        pointLight.Pos = plNode["position"].as<XMFLOAT3>();
+        pointLight.Attenuation = plNode["attenuation"].as<float>();
+
+        _pointLights[i] = pointLight;
+        i++;
     }
 }
 
