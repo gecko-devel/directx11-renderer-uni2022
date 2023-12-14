@@ -128,7 +128,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // PointLight
     // ----------------
     
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < numPointLights; i++)
     {
         float3 directionToPointLight = normalize(PointLights[i].pos - input.PosW);
         float distanceToPointLight = length(PointLights[i].pos - input.PosW);
@@ -142,7 +142,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
         diffuse += (DiffuseAmount * (DiffMat * PointLights[i].color)) * pointLightIntensity;
     
         // Specular
-        potentialSpecular = PointLights[i].color * texSpec.Sample(sampLinear, input.TexCoord);
+        if (hasSpecularMapTexture)
+            potentialSpecular = PointLights[i].color * texSpec.Sample(sampLinear, input.TexCoord);
+        else
+            potentialSpecular = PointLights[i].color;
+        
         reflectDir = normalize(reflect(-directionToPointLight, normalize(input.NormalW)));
         specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), specularPower);
         specular += (potentialSpecular * specularIntensity) * pointLightIntensity;
@@ -151,9 +155,12 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // ----------------
     // Texturing
     // ----------------
-
+    
+    // Modulate with late add. See verse Frank Luna 8.6 of the Bible to remind yourself what this means.
+    // Account for having no texture available by multiplying by texture first and only using the texture
+    // if it has one.
     float4 totalColor = (ambient + diffuse);
-    if (hasAlbedoTexture == true)
+    if (hasAlbedoTexture)
     {
         float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
         totalColor *= textureColor;
@@ -161,9 +168,5 @@ float4 PS(VS_OUTPUT input) : SV_Target
 
     totalColor += specular;
     
-    //= textureColor * (ambient + diffuse) + specular;
-
-    // Modulate with late add.
-    // See verse Frank Luna 8.6 of the Bible to remind yourself what this means.
     return totalColor;
 }

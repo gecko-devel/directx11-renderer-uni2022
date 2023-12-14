@@ -40,13 +40,17 @@ gameObjects:
     scale: [1.0, 1.0, 1.0]
     rotation: [0.0, 0.0, 0.0]
     
-  #- modelPath: "models\\TBH.obj"
-  #  material: "tbh"
-  #  position: [-3.0, 0.0, 0.0]
-  #  scale: [0.1, 0.1, 0.1]
-  #  rotation: [0.0, -90.0, 0.0]
+  - modelPath: "models\\sphere.obj"
+    material: "tbh"
+    position: [0.0, 0.0, -6.0]
+    scale: [1.0, 1.0, 1.0]
+    rotation: [0.0, 0.0, 0.0]
 
 pointLights:
   - position: [0.0, 0.0, 0.0]
     color: [0.0, 1.0, 0.0, 1.0]
+    attenuation: 0.3
+
+  - position: [0.0, 0.0, -5.5]
+    color: [1.0, 1.0, 1.0, 1.0]
     attenuation: 0.3
