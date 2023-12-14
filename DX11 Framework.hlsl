@@ -5,6 +5,12 @@
 //--------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------
+// Shader vars
+//--------------------------------------------------------------------------------------
+Texture2D texDiffuse : register(t0);
+SamplerState sampLinear : register(s0);
+
+//--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
 cbuffer ConstantBuffer : register( b0 )
@@ -36,6 +42,7 @@ struct VS_OUTPUT
     float4 Color : COLOR0;
     float3 PosW : POSITION0;
     float3 NormalW : NORMAL0;
+    float2 TexCoord : TEXCOORD0;
 };
 
 //--------------------------------------------------------------------------------------
@@ -78,15 +85,14 @@ VS_OUTPUT VS( float3 Pos : POSITION, float3 Normal : NORMAL, float3 PosW : POSIT
 // Pixel Shader
 //--------------------------------------------------------------------------------------
 float4 PS(VS_OUTPUT input) : SV_Target
-{
-    
+{   
     // Diffuse Lighting
     float4 potentialDiff = DiffLight * DiffMat;
     float difPercent = max(dot(normalize(DirToLight), normalize(input.NormalW)), 0);
     
     float DiffuseAmount = difPercent * potentialDiff;
     
-    input.Color = DiffuseAmount * (DiffMat * DiffLight);
+    input.Color += DiffuseAmount * (DiffMat * DiffLight);
     
     // Ambient Lighting
     input.Color += AmbLight * AmbMat;
@@ -104,6 +110,9 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     input.Color += (potentialSpecular * specularIntensity);
     
+    // Texturing
+    float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
+    input.Color *= textureColor;
     
     return input.Color;
 }

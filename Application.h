@@ -6,6 +6,7 @@
 #include <directxmath.h>
 #include <directxcolors.h>
 #include "resource.h"
+#include "DDSTextureLoader.h"
 
 using namespace DirectX;
 
@@ -13,6 +14,7 @@ struct SimpleVertex
 {
     XMFLOAT3 Pos;
     XMFLOAT3 Normal;
+	XMFLOAT2 UV;
 };
 
 struct ConstantBuffer
@@ -20,7 +22,6 @@ struct ConstantBuffer
 	XMMATRIX mWorld;
 	XMMATRIX mView;
 	XMMATRIX mProjection;
-
 
 	XMFLOAT4 AmbLight;
 	XMFLOAT4 AmbMat;
@@ -82,6 +83,10 @@ private:
 	XMFLOAT4 SpecularLight;
 	FLOAT SpecularPower; // Power to raise falloff by. Harshness of the light, basically.
 	XMFLOAT3 EyeWorldPos;
+
+	// Texture vars
+	ID3D11ShaderResourceView* _pTextureRV = nullptr;
+	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
