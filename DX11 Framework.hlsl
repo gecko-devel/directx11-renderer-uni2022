@@ -94,7 +94,7 @@ VS_OUTPUT VS(float3 Pos : POSITION, float3 Normal : NORMAL, float2 texcoord : TE
 float4 PS(VS_OUTPUT input) : SV_Target
 {
     //float4 litColor;
-    float4 ambient = float4(0.0, 0.0, 0.0, 0.0);
+    float4 ambient = float4(1.0f, 1.0f, 1.0f, 1.0f);
     float4 diffuse = float4(0.0, 0.0, 0.0, 0.0);
     float4 specular = float4(0.0, 0.0, 0.0, 0.0);
     
@@ -128,11 +128,13 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // PointLight
     // ----------------
     
-    for (int i = 0; i < -1; i++)
+    for (int i = 0; i < 1; i++)
     {
         float3 directionToPointLight = normalize(PointLights[i].pos - input.PosW);
         float distanceToPointLight = length(PointLights[i].pos - input.PosW);
-        float pointLightIntensity = 1 / 1 + pow(PointLights[i].attenuation * distanceToPointLight, 2);
+
+        float pointLightIntensity = 1.0f / (1.0f + pow(PointLights[i].attenuation * distanceToPointLight, 2.0f));
+       
     
         // Diffuse
         difPercent = max(dot(normalize(directionToPointLight), normalize(input.NormalW)), 0);
@@ -149,14 +151,19 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // ----------------
     // Texturing
     // ----------------
-    float4 textureColor = float4(0.0, 0.0, 0.0, 0.0);
-    
+
+    float4 totalColor = (ambient + diffuse);
     if (hasAlbedoTexture == true)
     {
-        textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
+        float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
+        totalColor *= textureColor;
     }
+
+    totalColor += specular;
     
+    //= textureColor * (ambient + diffuse) + specular;
+
     // Modulate with late add.
     // See verse Frank Luna 8.6 of the Bible to remind yourself what this means.
-    return textureColor * (ambient + diffuse) + specular;
+    return totalColor;
 }

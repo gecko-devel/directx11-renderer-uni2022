@@ -86,15 +86,15 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     // Add point lights
     PointLight pointLight1;
-    pointLight1.Pos = XMFLOAT3(-30.0f, 0.0f, -30.0f);
+    pointLight1.Pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
     pointLight1.Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-    pointLight1.Attenuation = 0.01f;
+    pointLight1.Attenuation = 0.3f;
     _pointLights[0] = pointLight1;
 
     PointLight pointLight2;
     pointLight2.Pos = XMFLOAT3(15.0f, 0.0f, 0.0f);
     pointLight2.Color = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-    pointLight2.Attenuation = 0.01f;
+    pointLight2.Attenuation = 1.0f;
     _pointLights[1] = pointLight2;
 
     // Create mip-map sampler using DirectX 11

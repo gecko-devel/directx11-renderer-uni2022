@@ -19,7 +19,7 @@ materials:
     albedoPath: "textures\\Crate_COLOR.dds"
     normalMapPath: "textures\\Crate_NORM.dds"
     specularMapPath: "textures\\Crate_SPEC.dds"
-    ambient: [1.0, 1.0, 1.0, 1.0]
+    ambient: [0.2, 0.2, 0.2, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 3.0
@@ -28,7 +28,7 @@ materials:
     albedoPath: ""
     normalMapPath: ""
     specularMapPath: ""
-    ambient: [5.0, 5.0, 5.0, 1.0]
+    ambient: [0.2, 0.2, 0.2, 0.2]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
     specularPower: 3.0
@@ -36,12 +36,17 @@ materials:
 gameObjects:
   - modelPath: "models\\cube.obj"
     material: "crate"
-    position: [0.0, 30.0, 0.0]
-    scale: [1.0, 0.0, 1.0]
-    rotation: [0.0, 0.0, 0.0]
-
-  - modelPath: "models\\TBH.obj"
-    material: "tbh"
-    position: [0.0, 0.0, 0.0]
+    position: [3.0, 0.0, 0.0]
     scale: [1.0, 1.0, 1.0]
-    rotation: [0.0, -90.0, 0.0]
+    rotation: [0.0, 0.0, 0.0]
+    
+  #- modelPath: "models\\TBH.obj"
+  #  material: "tbh"
+  #  position: [-3.0, 0.0, 0.0]
+  #  scale: [0.1, 0.1, 0.1]
+  #  rotation: [0.0, -90.0, 0.0]
+
+pointLights:
+  - position: [0.0, 0.0, 0.0]
+    color: [0.0, 1.0, 0.0, 1.0]
+    attenuation: 1.0
