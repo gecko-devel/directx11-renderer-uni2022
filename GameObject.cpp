@@ -43,7 +43,7 @@ XMFLOAT3 GameObject::GetPosition()
 	return XMFLOAT3(_trans._14, _trans._24, _trans._34);
 }
 
-float GameObject::GetDistanceToCamera(BaseCamera* camera)
+float GameObject::GetDistanceToCamera(Camera* camera)
 {
 	float distance;
 	XMStoreFloat(&distance, XMVector3Length(XMLoadFloat3(&this->GetPosition()) - XMLoadFloat3(&camera->GetPosition())));
