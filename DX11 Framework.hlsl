@@ -156,5 +156,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
         textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
     }
     
+    // Modulate with late add.
+    // See verse Frank Luna 8.6 of the Bible to remind yourself what this means.
     return textureColor * (ambient + diffuse) + specular;
 }
