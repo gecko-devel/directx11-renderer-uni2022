@@ -5,7 +5,7 @@ cameras:
     near: 0.01
     far: 100.0
     speed: 3.0 # metres per second
-    rotationSpeed: 30.0 # degrees per second
+    rotationSpeed: 50.0 # degrees per second
 
   - type: "normal"
     position: [0.0, 3.0, -10.0]

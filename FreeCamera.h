@@ -12,6 +12,13 @@ public:
 	
 	void Update();
 
+	void MoveZ(float distance);
+	void MoveX(float distance);
+	void MoveY(float distance);
+
+	void Pitch(float angle);
+	void Yaw(float angle);
+
 private:
 	float _speed;
 	float _rotationSpeed;

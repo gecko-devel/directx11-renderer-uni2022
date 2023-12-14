@@ -2,17 +2,17 @@
 
 int Input::GetVerticalAxis()
 {
-    return (int)GetAsyncKeyState(0x53) - (int)GetAsyncKeyState(0x57); // S and W
+    return  (int)(bool)GetAsyncKeyState(0x57) - (int)(bool)GetAsyncKeyState(0x53); // W and S
 }
 
 int Input::GetHorizontalAxis()
 {
-    return (int)GetAsyncKeyState(0x41) - (int)GetAsyncKeyState(0x44); // A and D
+    return (int)(bool)GetAsyncKeyState(0x44) - (int)(bool)GetAsyncKeyState(0x41); // D and A
 }
 
 int Input::GetUpDownAxis()
 {
-    return (int)GetAsyncKeyState(0x51) - (int)GetAsyncKeyState(0x45); // Q and E
+    return (int)(bool)GetAsyncKeyState(0x45) - (int)(bool)GetAsyncKeyState(0x51); // Q and E
 }
 
 XMFLOAT3 Input::Get3DInputVector()
@@ -22,12 +22,12 @@ XMFLOAT3 Input::Get3DInputVector()
 
 int Input::GetXAxis()
 {
-    return (int)GetAsyncKeyState(VK_UP) - (int)GetAsyncKeyState(VK_DOWN); // Down and Up arrows
+    return (int)(bool)GetAsyncKeyState(VK_UP) - (int)(bool)GetAsyncKeyState(VK_DOWN); // Down and Up arrows
 }
 
 int Input::GetYAxis()
 {
-    return (int)GetAsyncKeyState(VK_LEFT) - (int)GetAsyncKeyState(VK_RIGHT); // Left and Right arrows
+    return (int)(bool)GetAsyncKeyState(VK_RIGHT) - (int)(bool)GetAsyncKeyState(VK_LEFT); // Left and Right arrows
 }
 
 XMFLOAT2 Input::GetLookInputVector()
