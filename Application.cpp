@@ -466,8 +466,11 @@ void Application::Update()
     //
     // Animate the cube
     //
-	XMStoreFloat4x4(&_world, XMMatrixRotationY(t) * XMMatrixRotationZ(t));
-    XMStoreFloat4x4(&_world2, XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(t) * XMMatrixRotationZ(t));
+	XMStoreFloat4x4(&_world, XMMatrixScaling(0.5f, 0.5f, 0.5f) * XMMatrixRotationY(t) * XMMatrixRotationZ(t));
+
+    XMStoreFloat4x4(&_world2, XMMatrixScaling(0.2f, 0.2f, 0.2f) * XMMatrixRotationZ(t / 2) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(t / 2));
+
+    XMStoreFloat4x4(&_world3, XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationZ(t * 2) * XMMatrixTranslation(0.6f, 0.0f, 0.0f) * XMMatrixRotationY(-t * 3) * XMMatrixTranslation(2.0f, 0.0f, 0.0f) * XMMatrixRotationY(t / 2));
 }
 
 void Application::Draw()
@@ -503,6 +506,11 @@ void Application::Draw()
 	_pImmediateContext->DrawIndexed(36, 0, 0);        
 
     world = XMLoadFloat4x4(&_world2);
+    cb.mWorld = XMMatrixTranspose(world);
+    _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+    _pImmediateContext->DrawIndexed(36, 0, 0);
+
+    world = XMLoadFloat4x4(&_world3);
     cb.mWorld = XMMatrixTranspose(world);
     _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
     _pImmediateContext->DrawIndexed(36, 0, 0);
