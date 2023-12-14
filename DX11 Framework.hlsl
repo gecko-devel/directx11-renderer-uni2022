@@ -58,7 +58,6 @@ cbuffer ConstantBuffer : register( b0 )
 struct VS_OUTPUT
 {
     float4 Pos : SV_POSITION;
-    float4 Color : COLOR0;
     float3 PosW : POSITION0;
     float3 NormalW : NORMAL0;
     float2 TexCoord : TEXCOORD0;
@@ -94,39 +93,42 @@ VS_OUTPUT VS(float3 Pos : POSITION, float3 Normal : NORMAL, float2 texcoord : TE
 //--------------------------------------------------------------------------------------
 float4 PS(VS_OUTPUT input) : SV_Target
 {
+    //float4 litColor;
+    float4 ambient = float4(0.0, 0.0, 0.0, 0.0);
+    float4 diffuse = float4(0.0, 0.0, 0.0, 0.0);
+    float4 specular = float4(0.0, 0.0, 0.0, 0.0);
+    
     // Ambient Lighting
-    input.Color += mGlobalLight.AmbLight * AmbMat;
+    ambient = mGlobalLight.AmbLight * AmbMat;
     
     // ----------------
     // GlobalLight
     // ----------------
-    
     // Diffuse Lighting
     float4 potentialDiff = mGlobalLight.DiffLight * DiffMat;
     float difPercent = max(dot(normalize(mGlobalLight.DirectionToLight), normalize(input.NormalW)), 0);
-    
     float DiffuseAmount = difPercent * potentialDiff;
-    
-    input.Color += DiffuseAmount * (DiffMat * mGlobalLight.DiffLight);
+    diffuse += DiffuseAmount * (DiffMat * mGlobalLight.DiffLight);
     
     // Specular lighting
+    float4 potentialSpecular;
     
-    float4 potentialSpecular = mGlobalLight.SpecLight * texSpec.Sample(sampLinear, input.TexCoord);
-    
+    if (hasSpecularMapTexture)
+        potentialSpecular = mGlobalLight.SpecLight * texSpec.Sample(sampLinear, input.TexCoord);
+    else
+        potentialSpecular = mGlobalLight.SpecLight;
+     
     float3 viewerDir = normalize(EyePosW - input.PosW);
-    
     float3 reflectDir = reflect(-mGlobalLight.DirectionToLight, normalize(input.NormalW));
     reflectDir = normalize(reflectDir);
-    
     float specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), specularPower);
-    
-    input.Color += (potentialSpecular * specularIntensity);
+    specular += (potentialSpecular * specularIntensity);
     
     // ----------------
     // PointLight
     // ----------------
     
-    for (int i = 0; i < numPointLights; i++)
+    for (int i = 0; i < -1; i++)
     {
         float3 directionToPointLight = normalize(PointLights[i].pos - input.PosW);
         float distanceToPointLight = length(PointLights[i].pos - input.PosW);
@@ -135,23 +137,24 @@ float4 PS(VS_OUTPUT input) : SV_Target
         // Diffuse
         difPercent = max(dot(normalize(directionToPointLight), normalize(input.NormalW)), 0);
         DiffuseAmount = difPercent * potentialDiff;
-        input.Color += (DiffuseAmount * (DiffMat * PointLights[i].color)) * pointLightIntensity;
+        diffuse += (DiffuseAmount * (DiffMat * PointLights[i].color)) * pointLightIntensity;
     
         // Specular
         potentialSpecular = PointLights[i].color * texSpec.Sample(sampLinear, input.TexCoord);
         reflectDir = normalize(reflect(-directionToPointLight, normalize(input.NormalW)));
         specularIntensity = pow(max(dot(reflectDir, viewerDir), 0), specularPower);
-        input.Color += (potentialSpecular * specularIntensity) * pointLightIntensity;
+        specular += (potentialSpecular * specularIntensity) * pointLightIntensity;
     }
     
     // ----------------
     // Texturing
     // ----------------
+    float4 textureColor = float4(0.0, 0.0, 0.0, 0.0);
+    
     if (hasAlbedoTexture == true)
     {
-        float4 textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
-        input.Color *= textureColor;
+        textureColor = texDiffuse.Sample(sampLinear, input.TexCoord);
     }
     
-    return input.Color;
+    return textureColor * (ambient + diffuse) + specular;
 }

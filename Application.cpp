@@ -220,7 +220,7 @@ void Application::LoadConfig(std::string configPath)
         {
             ID3D11ShaderResourceView* normalMap;
             CreateDDSTextureFromFile(_pd3dDevice, std::wstring(normalMapPath.begin(), normalMapPath.end()).c_str(), nullptr, &normalMap); // Read DDS image file and write data to stack
-            material.AlbedoTexture = normalMap;
+            material.NormalMapTexture = normalMap;
         }
 
         // Get specular map texture
@@ -229,7 +229,7 @@ void Application::LoadConfig(std::string configPath)
         {
             ID3D11ShaderResourceView* specularMap;
             CreateDDSTextureFromFile(_pd3dDevice, std::wstring(specularMapPath.begin(), specularMapPath.end()).c_str(), nullptr, &specularMap); // Read DDS image file and write data to stack
-            material.AlbedoTexture = specularMap;
+            material.SpecularMapTexture = specularMap;
         }
 
         // Set reflectivity variables
@@ -539,6 +539,9 @@ void Application::Update()
     // Update the camera
     _currentCamera->Update();
 
+    // Spin cube
+    _gameObjects[0]->RotateOnAxes(XMFLOAT3(0.0, 10.0 * _deltaTime, 0.0));
+
     // Update GameObjects
     for (GameObject* go : _gameObjects)
     {
@@ -619,18 +622,19 @@ void Application::Draw()
         // Update the shader variables using the constant buffer struct
         _pImmediateContext->UpdateSubresource(_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
+        // Make stride and offset
         UINT stride = sizeof(SimpleVertex);
         UINT offset = 0;
 
-        // Set vertex and index buffers to draw the model
+        // Fill the index and vertex buffers with the index list and the vertices of the model respectively.
         _pImmediateContext->IASetVertexBuffers(0, 1, &go->GetMeshData()->VertexBuffer, &go->GetMeshData()->VBStride, &go->GetMeshData()->VBOffset);
         _pImmediateContext->IASetIndexBuffer(go->GetMeshData()->IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
-        // Set the shaders to use
+        // Set the shaders to use while drawing the model
         _pImmediateContext->PSSetShader(_pPixelShader, nullptr, 0);
         _pImmediateContext->VSSetShader(_pVertexShader, nullptr, 0);
 
-        // Send in the constant buffer to the shaders
+        // Set the constant buffer on each shader so it uses the piped in data
         _pImmediateContext->VSSetConstantBuffers(0, 1, &_pConstantBuffer);
         _pImmediateContext->PSSetConstantBuffers(0, 1, &_pConstantBuffer);        
 

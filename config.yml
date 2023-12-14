@@ -1,6 +1,6 @@
 debugCamera:
-  position: [0.0, 0.0, -100.0]
-  speed: 60.0
+  position: [0.0, 0.0, -10.0]
+  speed: 10.0
 
 materials:
   - name: "crate"
@@ -10,26 +10,11 @@ materials:
     ambient: [1.0, 1.0, 1.0, 1.0]
     diffuse: [1.0, 1.0, 1.0, 1.0]
     specular: [1.0, 1.0, 1.0, 1.0]
-    specularPower: 16.0
-
-  - name: "tbh"
-    albedoPath:
-    normalMapPath:
-    specularMapPath:
-    ambient: [1.0, 1.0, 1.0, 1.0]
-    diffuse: [1.0, 1.0, 1.0, 1.0]
-    specular: [1.0, 1.0, 1.0, 1.0]
-    specularPower: 4.0
+    specularPower: 3.0
 
 gameObjects:
-  - modelPath: "models\\TBH.obj"
-    material: "tbh"
-    position: [0.0, 0.0, 0.0]
-    scale: [0.5, 0.5, 0.5]
-    rotation: [0.0, -90.0, 0.0]
-
-  - modelPath: "models\\donut.obj"
+  - modelPath: "models\\cube.obj"
     material: "crate"
     position: [0.0, 0.0, 0.0]
-    scale: [40.0, 40.0, 40.0]
-    rotation: [0.0, 90.0, 90.0]
+    scale: [1.0, 1.0, 1.0]
+    rotation: [0.0, 0.0, 0.0]
