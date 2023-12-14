@@ -53,8 +53,6 @@ Application::Application()
 	_pConstantBuffer = nullptr;
 
     YAML::Node config = YAML::LoadFile("config.yml");
-
-    _cameraSpeed = 30.0f;
 }
 
 Application::~Application()
@@ -207,33 +205,30 @@ void Application::ParseConfig(std::string configPath)
     _config = YAML::LoadFile(configPath);
 
     // Read cameras
-    BaseCamera* cam = nullptr;
+    Camera* cam = nullptr;
 
     for (YAML::Node camNode : _config["cameras"])
     {
         std::string camType = camNode["type"].as<std::string>();
 
         XMFLOAT3 camPos = camNode["position"].as<XMFLOAT3>();
-        XMFLOAT3 camUp = camNode["up"].as<XMFLOAT3>();
-        XMFLOAT3 camLook = camNode["look"].as<XMFLOAT3>();
+        XMFLOAT3 camRot = camNode["rotation"].as<XMFLOAT3>();
         float camNear = camNode["near"].as<float>();
-        float camFar= camNode["far"].as<float>();
+        float camFar = camNode["far"].as<float>();
 
-        if (camType == "at")
+        if (camType == "normal")
         {
-            LookAtCamera* lookAtCam = new LookAtCamera(camPos, camUp, camLook, _WindowWidth, _WindowHeight, camNear, camFar);
-            cam = (BaseCamera*)lookAtCam;
-        }
-        else if (camType == "to")
-        {
-            LookToCamera* lookToCam = new LookToCamera(camPos, camUp, camLook, _WindowWidth, _WindowHeight, camNear, camFar);
-            cam = (BaseCamera*)lookToCam;
+            Camera* normalCamera = new Camera(camPos, _WindowWidth, _WindowHeight, camNear, camFar);
+            normalCamera->RotateEulerAngles(camRot);
+            cam = normalCamera;
         }
         else if (camType == "free")
         {
             float camSpeed = camNode["speed"].as<float>();
-            FreelookCamera* freeCam = new FreelookCamera(camPos, camUp, camLook, _WindowWidth, _WindowHeight, camNear, camFar, camSpeed);
-            cam = (BaseCamera*)freeCam;
+            float camRotSpeed = camNode["rotationSpeed"].as<float>();
+            FreeCamera* freeCam = new FreeCamera(camSpeed, camRotSpeed, camPos, _WindowWidth, _WindowHeight, camNear, camFar);
+            freeCam->RotateEulerAngles(camRot);
+            cam = (Camera*)freeCam;
         }
         else
         {
@@ -598,15 +593,8 @@ void Application::Update()
     if (GetAsyncKeyState(0x32))
         _currentCamera = _cameras.at(1);
 
-    // Move the Orbit camera
-    XMFLOAT3 orbitCamPos = _cameras.at(1)->GetPosition();
-    _cameras.at(1)->SetPosition(XMFLOAT3(-30.0f * sin(Time::GetTime()), orbitCamPos.y, orbitCamPos.z));
-
     // Update the camera
     _currentCamera->Update();
-
-    // Spin cube
-    //_translucentGameObjects[0]->RotateOnAxes(XMFLOAT3(0.0, 10.0 * Time::GetDeltaTime(), 0.0));
 
     // Update GameObjects
     for (GameObject* go : _orderedGameObjects)

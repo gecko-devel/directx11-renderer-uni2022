@@ -30,7 +30,10 @@ public:
 protected:
 	// Camera projection values
 	XMFLOAT3 _position;
+
+	XMFLOAT3 _forward;
 	XMFLOAT3 _up;
+	XMFLOAT3 _right;
 
 	FLOAT _windowHeight;
 	FLOAT _windowWidth;

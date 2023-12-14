@@ -2,7 +2,7 @@
 
 LookToCamera::LookToCamera(XMFLOAT3 position, XMFLOAT3 up, XMFLOAT3 to, UINT windowWidth, UINT windowHeight, FLOAT nearDepth, FLOAT farDepth) : BaseCamera::BaseCamera(position, up, windowWidth, windowHeight, nearDepth, farDepth)
 {
-	_to = to;
+	_forward = to;
 }
 
 void LookToCamera::Update()
@@ -12,7 +12,7 @@ void LookToCamera::Update()
 	// Create the view matrix
 	XMVECTOR positionVec = XMVectorSet(_position.x, _position.y, _position.z, 0.0f);
 	XMVECTOR upVec = XMVectorSet(_up.x, _up.y, _up.z, 0.0f);
-	XMVECTOR toVec = XMVectorSet(_to.x, _to.y, _to.z, 0.0f);
+	XMVECTOR toVec = XMVectorSet(_forward.x, _forward.y, _forward.z, 0.0f);
 
 	// If length of vector is higher than 1, normalise it.
 	// 
@@ -29,5 +29,5 @@ void LookToCamera::Update()
 
 void LookToCamera::SetTo(XMFLOAT3 newTo)
 {
-	_to = newTo;
+	_forward = newTo;
 }

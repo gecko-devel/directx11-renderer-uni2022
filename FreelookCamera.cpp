@@ -21,9 +21,9 @@ void FreelookCamera::Update()
 	// Rotation
 	XMFLOAT2 freeCamRotVelocity;
 	XMStoreFloat2(&freeCamRotVelocity, XMVector2Normalize(XMLoadFloat2(&lookInput)) * _rotationSpeed * Time::GetDeltaTime());
-	XMStoreFloat3(&_to, XMVector3Rotate(XMLoadFloat3(&_to), XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), freeCamRotVelocity.y)));
+	XMStoreFloat3(&_forward, XMVector3Rotate(XMLoadFloat3(&_forward), XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), freeCamRotVelocity.y)));
 
-	XMStoreFloat3(&_to, XMVector3Rotate(XMLoadFloat3(&_to), XMQuaternionRotationAxis(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), freeCamRotVelocity.x)));
+	XMStoreFloat3(&_forward, XMVector3Rotate(XMLoadFloat3(&_forward), XMQuaternionRotationAxis(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), freeCamRotVelocity.x)));
 
 
 	LookToCamera::Update();

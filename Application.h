@@ -9,14 +9,12 @@
 #include "DDSTextureLoader.h"
 #include "OBJLoader.h"
 #include "Structures.h"
-#include "BaseCamera.h"
-#include "LookToCamera.h"
-#include "LookAtCamera.h"
-#include "FreelookCamera.h"
 #include "GameObject.h"
 #include "Input.h"
 #include "Time.h"
 #include "yaml-cpp/yaml.h"
+#include "Camera.h"
+#include "FreeCamera.h"
 
 
 using namespace DirectX;
@@ -44,8 +42,8 @@ private:
 	ID3D11Texture2D* _depthStencilBuffer;
 
 	// Make Camera
-	BaseCamera* _currentCamera;
-	std::vector<BaseCamera*> _cameras;
+	Camera* _currentCamera;
+	std::vector<Camera*> _cameras;
 
 	// lighting vars
 	XMFLOAT4 _ambientLight;
@@ -59,10 +57,6 @@ private:
 	ID3D11SamplerState* _pSamplerLinear = nullptr;
 
 	ID3D11BlendState* _pTransparentBlendState = nullptr;
-
-	// Input vector
-	XMFLOAT3 _input;
-	FLOAT _cameraSpeed;
 
 	// Config file
 	YAML::Node _config;
